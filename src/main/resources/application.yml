@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: ns-sf-connector
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+
+netsuite:
+  token-url: https://5405357-sb1.suitetalk.api.netsuite.com/services/rest/auth/oauth2/v1/token
+  client-id: ${NS_CLIENT_ID}
+  cert-id: ${NS_CERT_ID}
+  scope:
+    - restlets
+    - rest_webservices
+salesforce:
+  auth-url: ${SF_TOKEN_URI}
+  client-id: ${SF_CLIENT_ID}
+  client-secret: ${SF_CLIENT_SECRET}
+  grant-type: client_credentials
+

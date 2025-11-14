@@ -1,34 +1,48 @@
+// java
 package com.hamiltonjewelers.ns_sf_connector.config;
 
-import io.github.cdimascio.dotenv.Dotenv;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
+@ConfigurationProperties(prefix = "netsuite")
 public class NsConfig {
-    private static final Dotenv dotenv = Dotenv.load();
-    private static final String clientId = dotenv.get("NS_CLIENT_ID");
-    private static final String certificateId = dotenv.get("NS_CERT_ID");
-
-    @Value("${netsuite.token-url}")
+    private String clientId;
+    private String certId;
     private String tokenUrl;
-
-    @Value("${netsuite.scope}")
-    private String scope;
+    private List<String> scope;
 
     public String getClientId() {
         return clientId;
     }
 
-    public String getCertificateId() {
-        return certificateId;
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getCertId() {
+        return certId;
+    }
+
+    public void setCertId(String certId) {
+        this.certId = certId;
     }
 
     public String getTokenUrl() {
         return tokenUrl;
     }
 
-    public String getScope() {
+    public void setTokenUrl(String tokenUrl) {
+        this.tokenUrl = tokenUrl;
+    }
+
+    public List<String> getScope() {
         return scope;
+    }
+
+    public void setScope(List<String> scope) {
+        this.scope = scope;
     }
 }
