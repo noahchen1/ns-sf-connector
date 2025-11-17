@@ -1,4 +1,4 @@
-package com.hamiltonjewelers.ns_sf_connector.service.netsuite.customer;
+package com.hamiltonjewelers.ns_sf_connector.client.ns.customer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
@@ -12,7 +12,7 @@ import java.net.http.HttpResponse;
 import java.util.List;
 
 @Component
-public class NetsuiteCustomerClient {
+public class NsCustomerClient {
     public List<CustomerItemDto> getCustomers(String accessToken) {
         final String url = "https://5405357-sb1.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql";
         final String queryStr = """

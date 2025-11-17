@@ -1,9 +1,12 @@
-// java
 package com.hamiltonjewelers.ns_sf_connector.config;
 
+import com.hamiltonjewelers.ns_sf_connector.client.ns.auth.JwtService;
+import com.hamiltonjewelers.ns_sf_connector.client.ns.auth.NsKeyLoader;
+import com.hamiltonjewelers.ns_sf_connector.utils.JoinUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.security.interfaces.ECPrivateKey;
 import java.util.List;
 
 @Component
@@ -11,8 +14,10 @@ import java.util.List;
 public class NsConfig {
     private String clientId;
     private String certId;
-    private String tokenUrl;
+    private String authUrl;
+    private String grantType;
     private List<String> scope;
+    private String clientAssertionType;
 
     public String getClientId() {
         return clientId;
@@ -30,12 +35,20 @@ public class NsConfig {
         this.certId = certId;
     }
 
-    public String getTokenUrl() {
-        return tokenUrl;
+    public String getAuthUrl() {
+        return authUrl;
     }
 
-    public void setTokenUrl(String tokenUrl) {
-        this.tokenUrl = tokenUrl;
+    public void setAuthUrl(String authUrl) {
+        this.authUrl = authUrl;
+    }
+
+    public String getGrantType() {
+        return grantType;
+    }
+
+    public void setGrantType(String grantType) {
+        this.grantType = grantType;
     }
 
     public List<String> getScope() {
@@ -44,5 +57,13 @@ public class NsConfig {
 
     public void setScope(List<String> scope) {
         this.scope = scope;
+    }
+
+    public String getClientAssertionType() {
+        return clientAssertionType;
+    }
+
+    public void setClientAssertionType(String clientAssertionType) {
+        this.clientAssertionType = clientAssertionType;
     }
 }

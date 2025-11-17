@@ -1,4 +1,4 @@
-package com.hamiltonjewelers.ns_sf_connector.service.jwt;
+package com.hamiltonjewelers.ns_sf_connector.client.ns.auth;
 
 import com.hamiltonjewelers.ns_sf_connector.NsSfConnectorApplication;
 

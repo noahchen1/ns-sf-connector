@@ -7,14 +7,17 @@ spring:
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
 
 netsuite:
-  token-url: https://5405357-sb1.suitetalk.api.netsuite.com/services/rest/auth/oauth2/v1/token
+  auth-url: ${NS_TOKEN_URI}
   client-id: ${NS_CLIENT_ID}
   cert-id: ${NS_CERT_ID}
+  grant-type: client_credentials
+  client-assertion-type: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
   scope:
     - restlets
     - rest_webservices
 salesforce:
   auth-url: ${SF_TOKEN_URI}
+  account-url: ${SF_ACCOUNT_URI}
   client-id: ${SF_CLIENT_ID}
   client-secret: ${SF_CLIENT_SECRET}
   grant-type: client_credentials

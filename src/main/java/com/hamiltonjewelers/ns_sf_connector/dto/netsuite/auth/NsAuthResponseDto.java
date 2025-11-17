@@ -1,6 +1,6 @@
-package com.hamiltonjewelers.ns_sf_connector.dto.netsuite;
+package com.hamiltonjewelers.ns_sf_connector.dto.netsuite.auth;
 
-public class TokenResponseDto {
+public class NsAuthResponseDto {
     private String access_token;
     private String token_type;
     private int expires_in;
