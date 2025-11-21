@@ -1,6 +1,7 @@
 package com.hamiltonjewelers.ns_sf_connector.client.sf.account;
 
 import com.hamiltonjewelers.ns_sf_connector.config.SfConfig;
+import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -19,12 +20,12 @@ public class SfAccountClient {
         this.webClient = webClientBuilder.baseUrl(config.getBaseUrl()).build();
     }
 
-    public String getAccounts(String accessToken) {
+    public List<AccountDto.AccountRecord> getAccounts(String accessToken) {
         final String queryStr = """
-                SELECT FIELDS(All) FROM ACCOUNT ORDER BY Name LIMIT 5
+                SELECT Id, Name FROM ACCOUNT ORDER BY Name LIMIT 5
             """;
 
-        return webClient
+        AccountDto res = webClient
                 .get()
                 .uri("/data/v64.0/query", uriBuilder -> uriBuilder
                         .queryParam("q", queryStr.replaceAll("\\s+", " ").trim())
@@ -44,7 +45,13 @@ public class SfAccountClient {
                                         Mono.error(new RuntimeException("Server error: " + response.statusCode() + " - " + body))
                                 )
                 )
-                .bodyToMono(String.class)
+                .bodyToMono(AccountDto.class)
                 .block();
+
+        if (res == null) {
+            throw new RuntimeException("Failed to fetch accounts: empty response");
+        }
+
+        return res.getRecords();
     }
 }

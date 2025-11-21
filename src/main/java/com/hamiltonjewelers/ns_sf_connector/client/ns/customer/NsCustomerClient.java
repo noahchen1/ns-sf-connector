@@ -1,9 +1,14 @@
 package com.hamiltonjewelers.ns_sf_connector.client.ns.customer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hamiltonjewelers.ns_sf_connector.config.NsConfig;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerResDto;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,8 +18,15 @@ import java.util.List;
 
 @Component
 public class NsCustomerClient {
+    final private NsConfig config;
+    final private WebClient webClient;
+
+    public NsCustomerClient(NsConfig config, WebClient.Builder webClientBuilder) {
+        this.config = config;
+        this.webClient = webClientBuilder.baseUrl(config.getBaseUrl()).build();
+    }
+
     public List<CustomerItemDto> getCustomers(String accessToken) {
-        final String url = "https://5405357-sb1.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql";
         final String queryStr = """
                     SELECT
                     customer.id AS internalId,
@@ -39,25 +51,32 @@ public class NsCustomerClient {
                 """;
         final String formmatedQuery = String.format("{\"q\": \"%s\"}", queryStr.replaceAll("\\s+", " ").trim());
 
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Authorization", "Bearer " + accessToken)
-                    .header("Content-Type", "application/json")
-                    .header("Prefer", "transient")
-                    .POST(HttpRequest.BodyPublishers.ofString(formmatedQuery))
-                    .build();
+        CustomerResDto res = webClient
+                .post()
+                .uri("/query/v1/suiteql")
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .header("Prefer", "transient")
+                .bodyValue(formmatedQuery)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body ->
+                                        Mono.error(new RuntimeException("Client Error: " + response.statusCode() + " - " + body))
+                                )
+                )
+                .onStatus(HttpStatusCode::is5xxServerError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body ->
+                                        Mono.error(new RuntimeException("Server error: " + response.statusCode() + " - " + body))
+                                )
+                ).bodyToMono(CustomerResDto.class)
+                .block();
 
-            HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            ObjectMapper mapper = new ObjectMapper();
-            CustomerResDto parsedRes = mapper.readValue(response.body(), CustomerResDto.class);
-
-            System.out.println(parsedRes);
-
-            return parsedRes.getItems();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (res == null) {
+            throw new RuntimeException("Failed to fetch ns customers: empty response");
         }
+
+        return res.getItems();
     }
 }

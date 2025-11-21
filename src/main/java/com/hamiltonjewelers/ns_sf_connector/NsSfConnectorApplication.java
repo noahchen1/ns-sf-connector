@@ -6,11 +6,14 @@ import com.hamiltonjewelers.ns_sf_connector.client.ns.customer.NsCustomerClient;
 import com.hamiltonjewelers.ns_sf_connector.client.sf.account.SfAccountClient;
 import com.hamiltonjewelers.ns_sf_connector.client.sf.auth.SfAuthClient;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.auth.NsAuthResponseDto;
+import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.auth.SfAuthResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.util.List;
 
 @SpringBootApplication
 public class NsSfConnectorApplication implements CommandLineRunner {
@@ -29,22 +32,19 @@ public class NsSfConnectorApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
-            String tokenRes = nsAuthClient.fetchAccessToken();
-            ObjectMapper mapper = new ObjectMapper();
-            NsAuthResponseDto parsedRes = mapper.readValue(tokenRes, NsAuthResponseDto.class);
-            String accessToken = parsedRes.getAccess_token();
+            String accessToken = nsAuthClient.fetchAccessToken();
 
             System.out.println(accessToken);
 
-            String sfTokenRes = sfAuthClient.fetchAccessToken();
+            String sfToken = sfAuthClient.fetchAccessToken();
 
-            ObjectMapper sfMapper = new ObjectMapper();
-            SfAuthResponseDto parsedSfRes = sfMapper.readValue(sfTokenRes, SfAuthResponseDto.class);
-            String sfToken = parsedSfRes.getAccess_token();
             System.out.println(sfToken);
-            String accountRes = sfAccountClient.getAccounts(sfToken);
+
+            List<AccountDto.AccountRecord> accountRes = sfAccountClient.getAccounts(sfToken);
 
             System.out.println(accountRes);
+
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -55,7 +55,6 @@ public class NsSfConnectorApplication implements CommandLineRunner {
         SpringApplication.run(NsSfConnectorApplication.class, args);
     }
 }
-
 
 // ssh -i /d/repo/db.pem -L
 // 15432:database-1.c8522k8ughqc.us-east-1.rds.amazonaws.com:5432

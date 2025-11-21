@@ -1,6 +1,7 @@
 package com.hamiltonjewelers.ns_sf_connector.client.sf.auth;
 
 import com.hamiltonjewelers.ns_sf_connector.config.SfConfig;
+import com.hamiltonjewelers.ns_sf_connector.dto.sf.auth.SfAuthResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class SfAuthClient {
     }
 
     public String fetchAccessToken() {
-        return webClient
+        SfAuthResponseDto res = webClient
                 .post()
                 .uri("/oauth2/token")
                 .header("Content-Type", "application/x-www-form-urlencoded")
@@ -41,8 +42,14 @@ public class SfAuthClient {
                                         Mono.error(new RuntimeException("Server error: " + response.statusCode() + " - " + body))
                                 )
                 )
-                .bodyToMono(String.class)
+                .bodyToMono(SfAuthResponseDto.class)
                 .block();
+
+        if (res == null) {
+            throw new RuntimeException("Failed to fetch access token from sf: empty response");
+        }
+
+        return res.getAccess_token();
     }
 
     public MultiValueMap<String, String> buildSfAuthForm() {
