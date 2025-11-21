@@ -5,19 +5,14 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "salesforce")
 public class SfConfig {
-    private String authUrl;
-    private String accountUrl;
     private String clientId;
     private String clientSecret;
     private String grantType;
+    private String baseUrl;
 
-    public String getAuthUrl() { return authUrl; }
+    public String getBaseUrl() { return baseUrl; }
 
-    public void setAuthUrl(String authUrl) { this.authUrl = authUrl; }
-
-    public String getAccountUrl() { return accountUrl; }
-
-    public void setAccountUrl(String accountUrl) { this.accountUrl = accountUrl; }
+    public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
 
     public String getClientId() { return clientId; }
 

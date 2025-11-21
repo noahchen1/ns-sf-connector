@@ -14,10 +14,14 @@ import java.util.List;
 public class NsConfig {
     private String clientId;
     private String certId;
-    private String authUrl;
     private String grantType;
     private List<String> scope;
     private String clientAssertionType;
+    private String baseUrl;
+
+    public String getBaseUrl() { return baseUrl; }
+
+    public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
 
     public String getClientId() {
         return clientId;
@@ -33,14 +37,6 @@ public class NsConfig {
 
     public void setCertId(String certId) {
         this.certId = certId;
-    }
-
-    public String getAuthUrl() {
-        return authUrl;
-    }
-
-    public void setAuthUrl(String authUrl) {
-        this.authUrl = authUrl;
     }
 
     public String getGrantType() {

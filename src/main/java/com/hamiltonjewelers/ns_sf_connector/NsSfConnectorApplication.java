@@ -41,9 +41,9 @@ public class NsSfConnectorApplication implements CommandLineRunner {
             ObjectMapper sfMapper = new ObjectMapper();
             SfAuthResponseDto parsedSfRes = sfMapper.readValue(sfTokenRes, SfAuthResponseDto.class);
             String sfToken = parsedSfRes.getAccess_token();
-
-            String accountRes = sfAccountClient.getAccounts(sfToken);
             System.out.println(sfToken);
+            String accountRes = sfAccountClient.getAccounts(sfToken);
+
             System.out.println(accountRes);
         } catch (Exception e) {
             throw new RuntimeException(e);

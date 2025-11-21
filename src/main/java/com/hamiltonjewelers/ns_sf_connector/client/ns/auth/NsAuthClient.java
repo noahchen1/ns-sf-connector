@@ -24,13 +24,13 @@ public class NsAuthClient {
     public NsAuthClient(NsConfig config, JwtService jwtService, WebClient.Builder webClientBuilder) {
         this.config = config;
         this.jwtService = jwtService;
-        this.webClient = webClientBuilder.build();
+        this.webClient = webClientBuilder.baseUrl(config.getBaseUrl()).build();
     }
 
     public String fetchAccessToken() {
         return webClient
                 .post()
-                .uri(config.getAuthUrl())
+                .uri("/auth/oauth2/v1/token")
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .body(BodyInserters.fromFormData(buildNsAuthForm()))
                 .retrieve()
@@ -56,7 +56,7 @@ public class NsAuthClient {
 
         CheckRequire.requireNonBlank(config.getClientId(), "netsuite.clientId");
         CheckRequire.requireNonBlank(config.getCertId(), "netsuite.certId");
-        CheckRequire.requireNonBlank(config.getAuthUrl(), "netsuite.tokenUrl");
+        CheckRequire.requireNonBlank(config.getBaseUrl(), "netsuite.tokenUrl");
         CheckRequire.requireNonBlank(config.getGrantType(), "netsuite.grantType");
         CheckRequire.requireNonBlank(config.getClientAssertionType(), "netsuite.clientAssertionType");
 
@@ -70,7 +70,7 @@ public class NsAuthClient {
             jwt = jwtService.createJwt(
                     config.getClientId(),
                     config.getCertId(),
-                    config.getAuthUrl(),
+                    config.getBaseUrl() + "/auth/oauth2/v1/token",
                     JoinUtils.joinCommaStrings(config.getScope()),
                     privateKey);
         } catch (Exception e) {

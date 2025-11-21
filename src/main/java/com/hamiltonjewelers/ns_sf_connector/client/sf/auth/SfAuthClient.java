@@ -19,13 +19,13 @@ public class SfAuthClient {
     @Autowired
     public SfAuthClient(SfConfig config, WebClient.Builder webClientBuilder) {
         this.config = config;
-        this.webClient = webClientBuilder.build();
+        this.webClient = webClientBuilder.baseUrl(config.getBaseUrl()).build();
     }
 
     public String fetchAccessToken() {
         return webClient
                 .post()
-                .uri(config.getAuthUrl())
+                .uri("/oauth2/token")
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .body(BodyInserters.fromFormData(buildSfAuthForm()))
                 .retrieve()

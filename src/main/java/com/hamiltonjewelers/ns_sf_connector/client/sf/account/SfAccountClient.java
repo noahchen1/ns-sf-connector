@@ -16,18 +16,17 @@ public class SfAccountClient {
 
     public SfAccountClient(SfConfig config, WebClient.Builder webClientBuilder) {
         this.config = config;
-        this.webClient = webClientBuilder.build();
+        this.webClient = webClientBuilder.baseUrl(config.getBaseUrl()).build();
     }
 
     public String getAccounts(String accessToken) {
         final String queryStr = """
                 SELECT FIELDS(All) FROM ACCOUNT ORDER BY Name LIMIT 5
             """;
-        final String formmatedQuery = String.format("{\"q\": \"%s\"}", queryStr.replaceAll("\\s+", " ").trim());
 
         return webClient
                 .get()
-                .uri(config.getAccountUrl(), uriBuilder -> uriBuilder
+                .uri("/data/v64.0/query", uriBuilder -> uriBuilder
                         .queryParam("q", queryStr.replaceAll("\\s+", " ").trim())
                         .build())
                 .header("Content-Type", "application/json")

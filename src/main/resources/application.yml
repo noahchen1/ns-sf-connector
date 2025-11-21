@@ -7,6 +7,7 @@ spring:
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
 
 netsuite:
+  base_url: ${NS_BASE_URI}
   auth-url: ${NS_TOKEN_URI}
   client-id: ${NS_CLIENT_ID}
   cert-id: ${NS_CERT_ID}
@@ -16,6 +17,7 @@ netsuite:
     - restlets
     - rest_webservices
 salesforce:
+  base_url: ${SF_BASE_URI}
   auth-url: ${SF_TOKEN_URI}
   account-url: ${SF_ACCOUNT_URI}
   client-id: ${SF_CLIENT_ID}
