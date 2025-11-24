@@ -16,6 +16,7 @@ public class CustomerDto {
     private String firstname;
     private String lastname;
     private String address;
+    private String sfid;
     private int subsidiary;
     private int rowId;
 
@@ -38,6 +39,8 @@ public class CustomerDto {
     public String getLastname() {
         return lastname;
     }
+
+    public String getSfid() { return sfid; }
 
     public int getSubsidiary() {
         return subsidiary;
@@ -83,6 +86,8 @@ public class CustomerDto {
         this.rowId = rowId;
     }
 
+    public void setSfid(String sfid) { this.sfid = sfid; }
+
     @Override
     public String toString() {
         return "CustomerDTO{" +
@@ -91,6 +96,7 @@ public class CustomerDto {
                 ", email=" + email +
                 ", firstname=" + firstname +
                 ", lastname=" + lastname +
+                ", sfid=" + sfid +
                 ", subsidiary=" + subsidiary +
                 ", rowId=" + rowId +
                 '}';

@@ -22,7 +22,7 @@ public class SfAccountClient {
 
     public List<AccountDto.AccountRecord> getAccounts(String accessToken) {
         final String queryStr = """
-                SELECT Id, Name FROM ACCOUNT ORDER BY Name LIMIT 5
+                SELECT Id, Netsuite_Id__c, First_Name__c, Last_Name__c, Account_Email__c FROM ACCOUNT WHERE Netsuite_Id__c != null LIMIT 5
             """;
 
         AccountDto res = webClient
@@ -48,10 +48,13 @@ public class SfAccountClient {
                 .bodyToMono(AccountDto.class)
                 .block();
 
+        System.out.println(res);
+
         if (res == null) {
             throw new RuntimeException("Failed to fetch accounts: empty response");
         }
 
         return res.getRecords();
     }
+
 }

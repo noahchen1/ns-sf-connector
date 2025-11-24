@@ -31,23 +31,23 @@ public class NsSfConnectorApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        try {
-            String accessToken = nsAuthClient.fetchAccessToken();
-
-            System.out.println(accessToken);
-
-            String sfToken = sfAuthClient.fetchAccessToken();
-
-            System.out.println(sfToken);
-
-            List<AccountDto.AccountRecord> accountRes = sfAccountClient.getAccounts(sfToken);
-
-            System.out.println(accountRes);
-
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            String accessToken = nsAuthClient.fetchAccessToken();
+//
+//            System.out.println(accessToken);
+//
+//            String sfToken = sfAuthClient.fetchAccessToken();
+//
+//            System.out.println(sfToken);
+//
+//            List<AccountDto.AccountRecord> accounts = sfAccountClient.getAccounts(sfToken);
+//
+//            System.out.println(accounts);
+//
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
 

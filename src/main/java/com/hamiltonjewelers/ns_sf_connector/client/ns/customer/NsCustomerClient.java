@@ -28,11 +28,12 @@ public class NsCustomerClient {
 
     public List<CustomerItemDto> getCustomers(String accessToken) {
         final String queryStr = """
-                    SELECT
+                    SELECT TOP(5)
                     customer.id AS internalId,
                     customer.entityId AS custId,
                     customer.lastName AS lastname,
                     customer.firstName AS firstname,
+                    customer.custentity_sfid AS sfid,
                     customer.email AS email,
                     CustomerSubsidiaryRelationship.subsidiary AS subsidiary,
                     entityAddress.addrText AS address

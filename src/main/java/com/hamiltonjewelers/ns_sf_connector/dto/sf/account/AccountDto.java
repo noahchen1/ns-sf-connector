@@ -1,5 +1,7 @@
 package com.hamiltonjewelers.ns_sf_connector.dto.sf.account;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class AccountDto {
@@ -33,8 +35,21 @@ public class AccountDto {
 
     public static class AccountRecord {
         private Attributes attributes;
+
+        @JsonProperty("Id")
         private String Id;
-        private String Name;
+
+        @JsonProperty("Netsuite_Id__c")
+        private Integer netsuiteId;
+
+        @JsonProperty("First_Name__c")
+        private String firstName;
+
+        @JsonProperty("Last_Name__c")
+        private String lastName;
+
+        @JsonProperty("Account_Email__c")
+        private String email;
 
         public Attributes getAttributes() {
             return attributes;
@@ -52,12 +67,31 @@ public class AccountDto {
             this.Id = Id;
         }
 
-        public String getName() {
-            return Name;
-        }
+        public Integer getNetsuiteId() { return netsuiteId; }
 
-        public void setName(String Name) {
-            this.Name = Name;
+        public void setNetsuiteId(Integer netsuiteId) { this.netsuiteId = netsuiteId; }
+
+        public String getFirstName() { return firstName; }
+
+        public void setFirstName(String firstName) { this.firstName = firstName; }
+
+        public String getLastName() { return lastName; }
+
+        public void setLastName(String lastName) { this.lastName = lastName; }
+
+        public String getEmail() { return email; }
+
+        public void setEmail(String email) { this.email = email; }
+
+        @Override
+        public String toString() {
+            return String.format("AccountRecord {Id='%s', First_Name='%s', Last_Name='%s', Email='%s', attributes=%s",
+                    Id,
+                    firstName,
+                    lastName,
+                    email,
+                    attributes
+            );
         }
     }
 
