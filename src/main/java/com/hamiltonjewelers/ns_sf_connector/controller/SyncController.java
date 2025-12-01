@@ -49,7 +49,21 @@ public class SyncController {
                 .map(nsMap::get)
                 .toList();
 
+        System.out.println(toInsertIntoSf);
 
+//        [CustomerItem{internalId='382547', cust_id='CUST169754', email='nstestcust1201@gmail.com', firstname='Nstest', lastname='Customer1201', subsidiary='30', address='Nstest Customer1201
+//            92 NASSAU ST
+//            PRINCETON NJ 08542-4519
+//            United States'}, CustomerItem{internalId='382447', cust_id='CUST169753', email='null', firstname='Test', lastname='User Acc 2', subsidiary='30', address='Test User Acc 2
+//            United States'}, CustomerItem{internalId='382345', cust_id='CUST169750', email='null', firstname='Test', lastname='Customer11262', subsidiary='30', address='Test Customer11262
+//            90 NASSAU ST
+//            PRINCETON NJ 08542-4520
+//            United States'}, CustomerItem{internalId='382347', cust_id='CUST169752', email='asdf@gmail.com', firstname='test7', lastname='test9', subsidiary='1', address='test7 test9
+//            123 fake st
+//            United States'}, CustomerItem{internalId='382346', cust_id='CUST169751', email='null', firstname='Test', lastname='Customer11263', subsidiary='30', address='Test Customer11263
+//            90 NASSAU ST
+//            PRINCETON NJ 08542-4520
+//            United States'}]
     }
 
 //    private boolean recordsAreEqual(CustomerItemDto customers, AccountDto.AccountRecord accounts) {
