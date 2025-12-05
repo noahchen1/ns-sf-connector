@@ -3,9 +3,11 @@ package com.hamiltonjewelers.ns_sf_connector;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.auth.NsAuthClient;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.customer.NsCustomerClient;
+import com.hamiltonjewelers.ns_sf_connector.client.ns.item.invLocation.NsInvLocationClient;
 import com.hamiltonjewelers.ns_sf_connector.client.sf.account.SfAccountClient;
 import com.hamiltonjewelers.ns_sf_connector.client.sf.auth.SfAuthClient;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.auth.NsAuthResponseDto;
+import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.invLocation.NsInvLocationResponseDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.auth.SfAuthResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,25 +31,30 @@ public class NsSfConnectorApplication implements CommandLineRunner {
     @Autowired
     private SfAccountClient sfAccountClient;
 
+    @Autowired
+    private NsInvLocationClient nsInvLocationClient;
+
     @Override
     public void run(String... args) {
-//        try {
-//            String accessToken = nsAuthClient.fetchAccessToken();
-//
-//            System.out.println(accessToken);
-//
-//            String sfToken = sfAuthClient.fetchAccessToken();
-//
-//            System.out.println(sfToken);
-//
+        try {
+            String accessToken = nsAuthClient.fetchAccessToken();
+
+            System.out.println(accessToken);
+
+            String sfToken = sfAuthClient.fetchAccessToken();
+
+            System.out.println(sfToken);
+
+            List<NsInvLocationResponseDto.InvLocation> res = nsInvLocationClient.getInvLocation(accessToken);
+
 //            List<AccountDto.AccountRecord> accounts = sfAccountClient.getAccounts(sfToken);
-//
-//            System.out.println(accounts);
-//
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
+
+            System.out.println(res.size());
+
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
