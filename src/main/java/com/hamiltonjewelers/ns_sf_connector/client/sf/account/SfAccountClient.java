@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class SfAccountClient {
@@ -55,6 +56,21 @@ public class SfAccountClient {
         }
 
         return res.getRecords();
+    }
+
+    public String createAccount(String accessToken, Map<String, Object> accountFields) {
+        String res = webClient
+                .post()
+                .uri("/data/v64.0/sobjects/Account")
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + accessToken)
+                .bodyValue(accountFields)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        System.out.println(res);
+        return res;
     }
 
 }

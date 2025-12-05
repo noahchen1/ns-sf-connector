@@ -48,5 +48,11 @@ public class SyncController {
                 .filter(netsuiteId -> !sfMap.containsKey(netsuiteId))
                 .map(nsMap::get)
                 .toList();
+
+
     }
+
+//    private boolean recordsAreEqual(CustomerItemDto customers, AccountDto.AccountRecord accounts) {
+//
+//    }
 }
