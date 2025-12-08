@@ -22,24 +22,35 @@ public class NsInvLocationClient {
 
     public List<NsInvLocationResponseDto.InvLocation> getInvLocation(String accessToken) {
         List<NsInvLocationResponseDto.InvLocation> allResults = new ArrayList<>();
-        long lastSeenItem = 0;
         boolean hasMore;
+        int startRow = 0;
+        int pageSize = 1000;
 
         ObjectMapper mapper = new ObjectMapper();
 
         do {
+            int endRow = startRow + pageSize;
             String queryStr = String.format("""
                     SELECT
-                        aggregateItemLocation.item AS item,
-                        aggregateItemLocation.location AS location,
-                        NVL(aggregateItemLocation.quantityOnHand, 0) AS onhandqty
+                      *
                     FROM
-                        aggregateItemLocation
+                      (
+                        SELECT
+                          rownum AS r,
+                          *
+                        FROM
+                          (
+                            SELECT
+                              aggregateItemLocation.item AS item,
+                              aggregateItemLocation.location AS location,
+                              NVL (aggregateItemLocation.quantityOnHand, 0) AS onhandqty
+                            FROM
+                              aggregateItemLocation
+                          )
+                      )
                     WHERE
-                        aggregateItemLocation.item > %d
-                    ORDER BY
-                        aggregateItemLocation.item ASC
-                    """, lastSeenItem);
+                      r BETWEEN %s AND %s
+                    """, startRow, endRow);
 
             String formattedQuery = String.format("{\"q\": \"%s\"}", queryStr.replaceAll("\\s+", " ").trim());
 
@@ -77,12 +88,10 @@ public class NsInvLocationClient {
             List<NsInvLocationResponseDto.InvLocation> results = res.getInvLocations();
             if (!results.isEmpty()) {
                 allResults.addAll(results);
-                lastSeenItem = results.getLast().getItem();
-
-                System.out.println(lastSeenItem);
+                startRow += pageSize;
             }
 
-            hasMore = !results.isEmpty();
+            hasMore = results.size() == pageSize;
         } while (hasMore);
 
         return allResults;

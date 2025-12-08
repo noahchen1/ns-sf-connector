@@ -34,3 +34,6 @@ build/
 .env
 src/main/resources/ns.pem
 src/main/resources/db.pem
+
+### File Generated ###
+inv_locations.csv
