@@ -1,10 +1,23 @@
 spring:
   application:
     name: ns-sf-connector
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+
+  datasource:
+    url: ${DB_HOST}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+#  autoconfigure:
+#    exclude:
+#      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+#      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
 
 netsuite:
   base_url: ${NS_BASE_URI}
@@ -17,10 +30,11 @@ netsuite:
     - restlets
     - rest_webservices
 salesforce:
-  base_url: ${SF_HJ_BASE_URI}
-  auth-url: ${SF_HJ_TOKEN_URI}
+  base_url: ${SF_BASE_URI}
+  auth-url: ${SF_TOKEN_URI}
   account-url: ${SF_ACCOUNT_URI}
-  client-id: ${SF_HJ_CLIENT_ID}
-  client-secret: ${SF_HJ_CLIENT_SECRET}
+  client-id: ${SF_CLIENT_ID}
+  client-secret: ${SF_CLIENT_SECRET}
   grant-type: client_credentials
+
 

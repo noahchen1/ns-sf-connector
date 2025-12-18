@@ -46,7 +46,7 @@ public class NsCustomerClient {
                     LEFT JOIN entityAddress ON entityAddress.nkey = entityAddressbook.AddressBookAddress
                     LEFT JOIN employee ON employee.id = customer.salesrep
                     WHERE
-                    TO_DATE (customer.datecreated, 'MM-DD-YYYY') BETWEEN '11-01-2025' AND TO_DATE  (SYSDATE, 'MM-DD-YYYY')
+                    TO_DATE (customer.datecreated, 'MM-DD-YYYY') BETWEEN '11-01-2025' AND '11-30-2025'
                     ORDER BY
                     customer.datecreated DESC
                 """;

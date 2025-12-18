@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @SpringBootApplication
-public class NsSfConnectorApplication implements CommandLineRunner {
+public class NsSfConnectorApplication {
     @Autowired
     private NsAuthClient nsAuthClient;
 
@@ -45,20 +45,20 @@ public class NsSfConnectorApplication implements CommandLineRunner {
     @Autowired
     private SfInvLocationBulkClient sfInvLocationBulkClient;
 
-    @Override
-    public void run(String... args) {
-        try {
-            String accessToken = nsAuthClient.fetchAccessToken();
-
-            System.out.println(accessToken);
-
-            String sfToken = sfAuthClient.fetchAccessToken();
-
-            System.out.println(sfToken);
-
-            List<NsInvLocationResponseDto.InvLocation> res = nsInvLocationClient.getInvLocation(accessToken);
-
-            SaveCsv.saveInvLocationsToCsv(res);
+//    @Override
+//    public void run(String... args) {
+//        try {
+//            String accessToken = nsAuthClient.fetchAccessToken();
+//
+//            System.out.println(accessToken);
+//
+//            String sfToken = sfAuthClient.fetchAccessToken();
+//
+//            System.out.println(sfToken);
+//
+//            List<NsInvLocationResponseDto.InvLocation> res = nsInvLocationClient.getInvLocation(accessToken);
+//
+//            SaveCsv.saveInvLocationsToCsv(res);
 
 //            String jobId = sfInvLocationBulkClient.createJob(sfToken);
 //
@@ -90,10 +90,10 @@ public class NsSfConnectorApplication implements CommandLineRunner {
 
 
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
 
     public static void main(String[] args) {
