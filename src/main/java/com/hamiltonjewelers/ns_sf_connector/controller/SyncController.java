@@ -1,6 +1,7 @@
 package com.hamiltonjewelers.ns_sf_connector.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.auth.NsAuthClient;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.customer.NsCustomerClient;
@@ -40,24 +41,54 @@ public class SyncController {
 
 
     @PostMapping
-    public void syncClients() throws JsonProcessingException {
-//        String nsToken = nsAuthClient.fetchAccessToken();
-//        String sfToken = sfAuthClient.fetchAccessToken();
-//
-//        List<CustomerItemDto> customers = nsCustomerClient.getCustomers(nsToken);
-//        List<AccountDto.AccountRecord> accounts = sfAccountClient.getAccounts(sfToken);
-//
-//        Map<Integer, CustomerItemDto> nsMap = customers.stream()
-//                .collect(Collectors.toMap(CustomerDto::getInternalId, c -> c));
-//
-//        Map<Integer, AccountDto.AccountRecord> sfMap = accounts.stream()
-//                .collect(Collectors.toMap(AccountDto.AccountRecord::getNetsuiteId, c -> c));
-//
-//        List<CustomerItemDto> toInsertIntoSf = nsMap.keySet().stream()
-//                .filter(netsuiteId -> !sfMap.containsKey(netsuiteId))
-//                .map(nsMap::get)
-//                .toList();
-//
+    public void syncClients() {
+        String nsToken = nsAuthClient.fetchAccessToken();
+        String sfToken = sfAuthClient.fetchAccessToken();
+
+        List<CustomerItemDto> customers = nsCustomerClient.getCustomers(nsToken);
+        List<AccountDto.AccountRecord> accounts = sfAccountClient.getAccounts(sfToken);
+
+        Map<Integer, CustomerItemDto> nsMap = customers.stream()
+                .collect(Collectors.toMap(CustomerDto::getInternalId, c -> c));
+
+        Map<Integer, AccountDto.AccountRecord> sfMap = accounts.stream()
+                .collect(Collectors.toMap(AccountDto.AccountRecord::getNetsuiteId, c -> c));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        List<SyncJob> toInsertIntoSf = nsMap.keySet().stream()
+                .filter(netsuiteId -> !sfMap.containsKey(netsuiteId))
+                .map(nsMap::get)
+                .map(customer -> {
+
+                    String internalId = String.valueOf(customer.getInternalId());
+
+                    SyncJob job = new SyncJob();
+                    job.setSourceSystem("Netsuite");
+                    job.setTargetSystem("Salesforce");
+                    job.setRecordType("Customer");
+                    job.setSourceRecordId(internalId);
+                    job.setTargetRecordId(null);
+                    job.setSyncType("REALTIME");
+                    job.setOperation("INSERT");
+                    job.setPriority(5);
+                    job.setStatus("PENDING");
+                    job.setAttemptCount(0);
+                    job.setMaxAttempts(5);
+                    job.setAvailableAt(LocalDateTime.now());
+                    job.setClaimedAt(null);
+                    job.setClaimedBy(null);
+                    job.setErrorMessage(null);
+
+                    return job;
+
+                }).toList();
+
+        List<SyncJob> results = syncJobService.createSyncJobs(toInsertIntoSf);
+
+        System.out.println(results);
+
+
 //        Map<String, Object> accountFields = Map.of(
 //                "Name", "Test Account",
 //                "First_Name__c", "First",
@@ -69,32 +100,35 @@ public class SyncController {
 //        sfAccountClient.createAccount(sfToken, accountFields);
 
 
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("customerName", "John Doe");
-        payload.put("email", "john.doe@example.com");
-        ObjectMapper objectMapper = new ObjectMapper();
-
-
-        SyncJob syncJob = new SyncJob();
-        syncJob.setSourceSystem("ERP");
-        syncJob.setTargetSystem("CRM");
-        syncJob.setRecordType("Customer");
-        syncJob.setSourceRecordId("SRC12345");
-        syncJob.setTargetRecordId("TGT67890");
-        syncJob.setSyncType("FULL");
-        syncJob.setOperation("INSERT");
-        syncJob.setGroupingKey("batch-20240610");
-        syncJob.setPriority(5);
-        syncJob.setStatus("PENDING");
-        syncJob.setAttemptCount(0);
-        syncJob.setMaxAttempts(5);
-        syncJob.setAvailableAt(LocalDateTime.parse("2024-06-10T12:00:00"));
-        syncJob.setClaimedAt(null);
-        syncJob.setClaimedBy(null);
-        syncJob.setPayload(objectMapper.writeValueAsString(payload));
-        syncJob.setErrorMessage(null);
-
-        syncJobService.createSyncJob(syncJob);
+//        Map<String, Object> payload = new HashMap<>();
+//        payload.put("customerName", "John Doe");
+//        payload.put("email", "john.doe@example.com");
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        JsonNode payloadJson = objectMapper.convertValue(payload, JsonNode.class);
+//
+//        System.out.println(payload);
+//        System.out.println(payloadJson);
+//
+//        SyncJob syncJob = new SyncJob();
+//        syncJob.setSourceSystem("ERP");
+//        syncJob.setTargetSystem("CRM");
+//        syncJob.setRecordType("Customer");
+//        syncJob.setSourceRecordId("SRC12345");
+//        syncJob.setTargetRecordId("TGT67890");
+//        syncJob.setSyncType("FULL");
+//        syncJob.setOperation("INSERT");
+//        syncJob.setGroupingKey("batch-20240610");
+//        syncJob.setPriority(5);
+//        syncJob.setStatus("PENDING");
+//        syncJob.setAttemptCount(0);
+//        syncJob.setMaxAttempts(5);
+//        syncJob.setAvailableAt(LocalDateTime.parse("2024-06-10T12:00:00"));
+//        syncJob.setClaimedAt(null);
+//        syncJob.setClaimedBy(null);
+//        syncJob.setPayload(objectMapper.writeValueAsString(payloadJson));
+//        syncJob.setErrorMessage(null);
+//
+//        syncJobService.createSyncJob(syncJob);
 
     }
 

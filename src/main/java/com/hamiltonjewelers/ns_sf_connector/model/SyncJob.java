@@ -1,12 +1,16 @@
 package com.hamiltonjewelers.ns_sf_connector.model;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
+
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
 @Entity
 @Table(name = "sync_job")
+
 public class SyncJob {
     @Id
     private UUID id;
@@ -23,7 +27,7 @@ public class SyncJob {
     @Column(name = "source_record_id", nullable = false, length = 100)
     private String sourceRecordId;
 
-    @Column(name = "target_record_id", nullable = false, length = 100)
+    @Column(name = "target_record_id", length = 100)
     private String targetRecordId;
 
     @Column(name = "sync_type", nullable = false, length = 20)
@@ -31,9 +35,6 @@ public class SyncJob {
 
     @Column(name = "operation", nullable = false, length = 20)
     private String operation;
-
-    @Column(name = "grouping_key", length = 150)
-    private String groupingKey;
 
     @Column(name = "priority")
     private Integer priority = 5;
@@ -55,9 +56,6 @@ public class SyncJob {
 
     @Column(name = "claimed_by", length = 100)
     private String claimedBy;
-
-    @Column(name = "payload", columnDefinition = "jsonb")
-    private String payload;
 
     @Column(name = "error_message")
     private String errorMessage;
@@ -94,9 +92,6 @@ public class SyncJob {
     public String getOperation() { return operation; }
     public void setOperation(String operation) { this.operation = operation; }
 
-    public String getGroupingKey() { return groupingKey; }
-    public void setGroupingKey(String groupingKey) { this.groupingKey = groupingKey; }
-
     public Integer getPriority() { return priority; }
     public void setPriority(Integer priority) { this.priority = priority; }
 
@@ -118,9 +113,6 @@ public class SyncJob {
     public String getClaimedBy() { return claimedBy; }
     public void setClaimedBy(String claimedBy) { this.claimedBy = claimedBy; }
 
-    public String getPayload() { return payload; }
-    public void setPayload(String payload) { this.payload = payload; }
-
     public String getErrorMessage() { return errorMessage; }
     public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 
@@ -129,4 +121,25 @@ public class SyncJob {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("SyncJob{");
+        sb.append("id=").append(id);
+        sb.append(", sourceSystem='").append(sourceSystem).append('\'');
+        sb.append(", targetSystem='").append(targetSystem).append('\'');
+        sb.append(", recordType='").append(recordType).append('\'');
+        sb.append(", sourceRecordId='").append(sourceRecordId).append('\'');
+        sb.append(", targetRecordId='").append(targetRecordId).append('\'');
+        sb.append(", operation='").append(operation).append('\'');
+        sb.append(", status='").append(status).append('\'');
+        sb.append(", priority=").append(priority);
+        sb.append(", attemptCount=").append(attemptCount);
+        sb.append(", availableAt=").append(availableAt);
+        if (errorMessage != null) {
+            sb.append(", errorMessage='").append(errorMessage).append('\'');
+        }
+        sb.append('}');
+        return sb.toString();
+    }
 }
