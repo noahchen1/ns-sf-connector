@@ -64,4 +64,26 @@ public class SyncJobService {
 
         return results;
     }
+
+    @Transactional
+    public List<SyncJob> claimJobs(int limit, String workerId) {
+        Objects.requireNonNull(workerId, "workerId must not be null");
+        if (limit <= 0) throw new IllegalArgumentException("limit must be greater than 0");
+
+        List<String> claimableStatuses = List.of("PENDING");
+
+        List<SyncJob> candidates = repository.findAvailableForClaim(claimableStatuses, limit);
+
+        if (candidates.isEmpty()) return List.of();
+
+        List<UUID> ids = candidates.stream().map(SyncJob::getId).toList();
+
+        int updated = repository.claimByIds(ids, "PROCESSING", workerId);
+        if (updated == 0) return List.of();
+
+        List<SyncJob> claimed = repository.findAllById(ids);
+        return claimed;
+    }
+
+
 }

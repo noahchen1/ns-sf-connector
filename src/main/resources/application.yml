@@ -14,6 +14,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+app:
+  worker:
+    count: 2
+    claim:
+      limit: 1
 #  autoconfigure:
 #    exclude:
 #      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
