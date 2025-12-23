@@ -36,63 +36,54 @@ public class SyncController {
     private NsAuthClient nsAuthClient;
     @Autowired
     private SfAuthClient sfAuthClient;
-
     @Autowired
     private SyncJobService syncJobService;
 
-
-
-
     @PostMapping
     public void syncClients() {
+        String nsToken = nsAuthClient.fetchAccessToken();
+        String sfToken = sfAuthClient.fetchAccessToken();
 
-        String workerId = WorkerIdGenerator.getWorkerId();
+        List<CustomerItemDto> customers = nsCustomerClient.getCustomers(nsToken);
+        List<AccountDto.AccountRecord> accounts = sfAccountClient.getAccounts(sfToken);
 
-        System.out.println("Worker Id: " + workerId);
+        Map<Integer, CustomerItemDto> nsMap = customers.stream()
+                .collect(Collectors.toMap(CustomerDto::getInternalId, c -> c));
 
-//        String nsToken = nsAuthClient.fetchAccessToken();
-//        String sfToken = sfAuthClient.fetchAccessToken();
-//
-//        List<CustomerItemDto> customers = nsCustomerClient.getCustomers(nsToken);
-//        List<AccountDto.AccountRecord> accounts = sfAccountClient.getAccounts(sfToken);
-//
-//        Map<Integer, CustomerItemDto> nsMap = customers.stream()
-//                .collect(Collectors.toMap(CustomerDto::getInternalId, c -> c));
-//
-//        Map<Integer, AccountDto.AccountRecord> sfMap = accounts.stream()
-//                .collect(Collectors.toMap(AccountDto.AccountRecord::getNetsuiteId, c -> c));
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        List<SyncJob> toInsertIntoSf = nsMap.keySet().stream()
-//                .filter(netsuiteId -> !sfMap.containsKey(netsuiteId))
-//                .map(nsMap::get)
-//                .map(customer -> {
-//
-//                    String internalId = String.valueOf(customer.getInternalId());
-//
-//                    SyncJob job = new SyncJob();
-//                    job.setSourceSystem("Netsuite");
-//                    job.setTargetSystem("Salesforce");
-//                    job.setRecordType("Customer");
-//                    job.setSourceRecordId(internalId);
-//                    job.setTargetRecordId(null);
-//                    job.setSyncType("REALTIME");
-//                    job.setOperation("INSERT");
-//                    job.setPriority(5);
-//                    job.setStatus("PENDING");
-//                    job.setAttemptCount(0);
-//                    job.setMaxAttempts(5);
-//                    job.setAvailableAt(LocalDateTime.now());
-//                    job.setClaimedAt(null);
-//                    job.setClaimedBy(null);
-//                    job.setErrorMessage(null);
-//
-//                    return job;
-//
-//                }).toList();
-//
-//        List<SyncJob> results = syncJobService.createSyncJobs(toInsertIntoSf);
+        Map<Integer, AccountDto.AccountRecord> sfMap = accounts.stream()
+                .collect(Collectors.toMap(AccountDto.AccountRecord::getNetsuiteId, c -> c));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        List<SyncJob> toInsertIntoSf = nsMap.keySet().stream()
+                .filter(netsuiteId -> !sfMap.containsKey(netsuiteId))
+                .map(nsMap::get)
+                .map(customer -> {
+
+                    String internalId = String.valueOf(customer.getInternalId());
+
+                    SyncJob job = new SyncJob();
+                    job.setSourceSystem("Netsuite");
+                    job.setTargetSystem("Salesforce");
+                    job.setRecordType("Customer");
+                    job.setSourceRecordId(internalId);
+                    job.setTargetRecordId(null);
+                    job.setSyncType("REALTIME");
+                    job.setOperation("INSERT");
+                    job.setPriority(5);
+                    job.setStatus("PENDING");
+                    job.setAttemptCount(0);
+                    job.setMaxAttempts(5);
+                    job.setAvailableAt(LocalDateTime.now());
+                    job.setClaimedAt(null);
+                    job.setClaimedBy(null);
+                    job.setErrorMessage(null);
+
+                    return job;
+
+                }).toList();
+
+        List<SyncJob> results = syncJobService.createSyncJobs(toInsertIntoSf);
 
 
 

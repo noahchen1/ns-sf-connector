@@ -1,6 +1,8 @@
 package com.hamiltonjewelers.ns_sf_connector.service;
 
+import com.hamiltonjewelers.ns_sf_connector.model.ScheduledSyncJob;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
+import com.hamiltonjewelers.ns_sf_connector.repository.ScheduledSyncJobRepository;
 import com.hamiltonjewelers.ns_sf_connector.repository.SyncJobRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -11,17 +13,18 @@ import java.util.*;
 
 @Service
 public class SyncJobService {
-    private final SyncJobRepository repository;
+    private final SyncJobRepository syncJobRepository;
+    private final ScheduledSyncJobRepository scheduledSyncJobRepository;
 
     public SyncJobService(SyncJobRepository repository) {
-        this.repository = repository;
+        this.syncJobRepository = repository;
     }
 
     @Transactional
     public SyncJob createSyncJob(SyncJob newJob) {
         Objects.requireNonNull(newJob, "newJob must not be null");
 
-        Optional<SyncJob> existing = repository.findBySourceSystemAndRecordTypeAndSourceRecordIdAndOperation(
+        Optional<SyncJob> existing = syncJobRepository.findBySourceSystemAndRecordTypeAndSourceRecordIdAndOperation(
                 newJob.getSourceSystem(),
                 newJob.getRecordType(),
                 newJob.getSourceRecordId(),
@@ -32,9 +35,9 @@ public class SyncJobService {
         newJob.setId(UUID.randomUUID());
 
         try {
-            return repository.save(newJob);
+            return syncJobRepository.save(newJob);
         } catch (DataIntegrityViolationException ex) {
-            return repository.findBySourceSystemAndRecordTypeAndSourceRecordIdAndOperation(
+            return syncJobRepository.findBySourceSystemAndRecordTypeAndSourceRecordIdAndOperation(
                     newJob.getSourceSystem(),
                     newJob.getRecordType(),
                     newJob.getSourceRecordId(),
@@ -72,18 +75,35 @@ public class SyncJobService {
 
         List<String> claimableStatuses = List.of("PENDING");
 
-        List<SyncJob> candidates = repository.findAvailableForClaim(claimableStatuses, limit);
+        List<SyncJob> candidates = syncJobRepository.findAvailableForClaim(claimableStatuses, limit);
 
         if (candidates.isEmpty()) return List.of();
 
         List<UUID> ids = candidates.stream().map(SyncJob::getId).toList();
 
-        int updated = repository.claimByIds(ids, "PROCESSING", workerId);
+        int updated = syncJobRepository.claimByIds(ids, "PROCESSING", workerId);
         if (updated == 0) return List.of();
 
-        List<SyncJob> claimed = repository.findAllById(ids);
-        return claimed;
+        return syncJobRepository.findAllById(ids);
     }
 
+    @Transactional
+    public List<SyncJob> createScheduledSyncJob(ScheduledSyncJob newJob) {
+        Objects.requireNonNull(newJob, "new scheduled job must not be null");
 
+        ScheduledSyncJob existing = scheduledSyncJobRepository.getLastScheduledSyncJob(
+                newJob.getSourceSystem(),
+                newJob.getTargetSystem(),
+                newJob.getRecordType(),
+                "SCHEDULED"
+        );
+
+        if (existing != null) {
+
+        } else {
+
+
+            scheduledSyncJobRepository.save(newJob);
+        }
+    }
 }

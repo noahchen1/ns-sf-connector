@@ -1,11 +1,15 @@
 package com.hamiltonjewelers.ns_sf_connector.repository;
 
+import com.hamiltonjewelers.ns_sf_connector.model.ScheduledSyncJob;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,4 +65,6 @@ public interface SyncJobRepository extends JpaRepository<SyncJob, UUID> {
             @Param("recordType") String recordType,
             @Param("operation") String operation,
             @Param("limit") int limit);
+
+
 }

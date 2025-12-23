@@ -1,11 +1,8 @@
 package com.hamiltonjewelers.ns_sf_connector.model;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -141,5 +138,8 @@ public class SyncJob {
         }
         sb.append('}');
         return sb.toString();
+    }
+
+    public static class ScheduledSyncJob {
     }
 }

@@ -66,22 +66,32 @@ public class WorkerManager {
                     System.out.printf("[%s] Attempting to claim up to %d jobs...%n", workerId, claimLimit);
                     List<SyncJob> claimed = syncJobService.claimJobs(claimLimit, workerId);
 
-                    System.out.printf("worker %s claimed job %s ", workerId, claimed);
-
-                    long durationMs = Duration.between(start, Instant.now()).toMillis();
+                    System.out.printf("worker %s claimed job %s...%n", workerId,
+                            claimed);
 
                     if (claimed.isEmpty()) {
-                        System.out.printf("[%s] No jobs available (claimed in %d ms). Sleeping for 1 second...%n",
-                                workerId, durationMs);
-                        Thread.sleep(Duration.ofSeconds(1).toMillis());
+                        System.out.printf("[%s] No jobs available. Sleeping " +
+                                        "for 5 second...%n",
+                                workerId);
+
+                        Thread.sleep(Duration.ofSeconds(5).toMillis());
+
                         continue;
                     }
 
-                    System.out.printf("[%s] Claimed %d jobs in %d ms:%n", workerId, claimed.size(), durationMs);
+                    System.out.printf("[%s] Claimed %d jobs...%n", workerId,
+                            claimed.size());
 
                     for (SyncJob job : claimed) {
-                        System.out.printf("[%s] Starting job %s (status: %s, attempts: %d)%n",
-                                workerId, job.getId(), job.getStatus(), job.getAttemptCount());
+                        System.out.printf("[%s] Starting job %s (record: %s, " +
+                                        "source: %s, status: %s, attempts: " +
+                                        "%s)%n",
+                                workerId,
+                                job.getId(),
+                                job.getRecordType(),
+                                job.getSourceSystem(),
+                                job.getStatus(),
+                                job.getAttemptCount());
                         try {
                             // TODO: perform actual sync work here
                             System.out.printf("[%s] Processing job %s...%n", workerId, job.getId());
@@ -110,5 +120,4 @@ public class WorkerManager {
             System.out.println("Worker " + workerId + " stopped!");
         }
     }
-
 }
