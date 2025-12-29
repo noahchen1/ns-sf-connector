@@ -13,7 +13,8 @@ public interface ScheduledSyncJobRepository extends JpaRepository<ScheduledSyncJ
         WHERE source_system = :sourceSystem
             AND target_system = :targetSystem
             AND record_type = :recordType
-            AND sync_type =: syncType
+            AND sync_type = :syncType
+        LIMIT 1
     """, nativeQuery = true)
     ScheduledSyncJob getLastScheduledSyncJob(
             @Param("sourceSystem") String sourceSystem,

@@ -4,11 +4,13 @@ import com.hamiltonjewelers.ns_sf_connector.model.ScheduledSyncJob;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.repository.ScheduledSyncJobRepository;
 import com.hamiltonjewelers.ns_sf_connector.repository.SyncJobRepository;
+import org.springframework.cglib.core.Local;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -16,8 +18,9 @@ public class SyncJobService {
     private final SyncJobRepository syncJobRepository;
     private final ScheduledSyncJobRepository scheduledSyncJobRepository;
 
-    public SyncJobService(SyncJobRepository repository) {
-        this.syncJobRepository = repository;
+    public SyncJobService(SyncJobRepository syncJobRepository, ScheduledSyncJobRepository scheduledSyncJobRepository) {
+        this.syncJobRepository = syncJobRepository;
+        this.scheduledSyncJobRepository = scheduledSyncJobRepository;
     }
 
     @Transactional
@@ -88,7 +91,7 @@ public class SyncJobService {
     }
 
     @Transactional
-    public List<SyncJob> createScheduledSyncJob(ScheduledSyncJob newJob) {
+    public ScheduledSyncJob createScheduledSyncJob(ScheduledSyncJob newJob) {
         Objects.requireNonNull(newJob, "new scheduled job must not be null");
 
         ScheduledSyncJob existing = scheduledSyncJobRepository.getLastScheduledSyncJob(
@@ -99,11 +102,14 @@ public class SyncJobService {
         );
 
         if (existing != null) {
+            existing.setLastSuccessfulAt(LocalDateTime.now());
 
+            return scheduledSyncJobRepository.save(existing);
         } else {
+            newJob.setId(UUID.randomUUID());
+            newJob.setLastSuccessfulAt(LocalDateTime.now());
 
-
-            scheduledSyncJobRepository.save(newJob);
+            return scheduledSyncJobRepository.save(newJob);
         }
     }
 }
