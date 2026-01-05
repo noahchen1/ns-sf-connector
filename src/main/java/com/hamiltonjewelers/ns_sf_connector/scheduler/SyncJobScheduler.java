@@ -15,7 +15,7 @@ public class SyncJobScheduler {
         this.syncJobService = syncJobService;
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 10000)
     public void scheduledSyncJobs() {
         try {
             ScheduledSyncJob job = new ScheduledSyncJob();
@@ -28,7 +28,8 @@ public class SyncJobScheduler {
 
             ScheduledSyncJob scheduledJob = syncJobService.createScheduledSyncJob(job);
 
-            System.out.printf("[%s] Scheduled job (Source: %s, Target: %s, Record: %s) successfully created/updated!",
+            System.out.printf("[%s] Scheduled job (Source: %s, Target: %s, " +
+                            "Record: %s) successfully created/updated!%n",
                     scheduledJob.getId(),
                     scheduledJob.getSourceSystem(),
                     scheduledJob.getTargetSystem(),

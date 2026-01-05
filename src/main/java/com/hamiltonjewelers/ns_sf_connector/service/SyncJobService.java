@@ -1,10 +1,8 @@
 package com.hamiltonjewelers.ns_sf_connector.service;
-
 import com.hamiltonjewelers.ns_sf_connector.model.ScheduledSyncJob;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.repository.ScheduledSyncJobRepository;
 import com.hamiltonjewelers.ns_sf_connector.repository.SyncJobRepository;
-import org.springframework.cglib.core.Local;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -17,10 +15,14 @@ import java.util.*;
 public class SyncJobService {
     private final SyncJobRepository syncJobRepository;
     private final ScheduledSyncJobRepository scheduledSyncJobRepository;
+    private final SyncJobFactory syncJobFactory;
 
-    public SyncJobService(SyncJobRepository syncJobRepository, ScheduledSyncJobRepository scheduledSyncJobRepository) {
+    public SyncJobService(SyncJobRepository syncJobRepository,
+                          ScheduledSyncJobRepository scheduledSyncJobRepository,
+                          SyncJobFactory syncJobFactory) {
         this.syncJobRepository = syncJobRepository;
         this.scheduledSyncJobRepository = scheduledSyncJobRepository;
+        this.syncJobFactory = syncJobFactory;
     }
 
     @Transactional
@@ -104,11 +106,20 @@ public class SyncJobService {
         if (existing != null) {
             existing.setLastSuccessfulAt(LocalDateTime.now());
 
+            List<SyncJob> toInsertIntoSf = syncJobFactory.buildCustomerInsertJobs();
+            List<SyncJob> results = createSyncJobs(toInsertIntoSf);
+
+            System.out.printf("Scheduled sync job results: %s!%n", results);
+
             return scheduledSyncJobRepository.save(existing);
         } else {
+            List<SyncJob> toInsertIntoSf = syncJobFactory.buildCustomerInsertJobs();
+            List<SyncJob> results = createSyncJobs(toInsertIntoSf);
+
+            System.out.printf("New Scheduled sync job results: %s!%n",
+                    results);
             newJob.setId(UUID.randomUUID());
             newJob.setLastSuccessfulAt(LocalDateTime.now());
-
             return scheduledSyncJobRepository.save(newJob);
         }
     }
