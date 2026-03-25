@@ -80,4 +80,48 @@ public class NsCustomerClient {
 
         return res.getItems();
     }
+
+    public List<CustomerItemDto> getCustomer(String accessToken, String internalId) {
+        final String queryStr = """
+                    SELECT
+                    customer.id AS internalId,
+                    customer.entityId AS custId,
+                    customer.lastName AS lastname,
+                    customer.firstName AS firstname,
+                    customer.email AS email,
+                    FROM
+                    customer
+                    WHERE customer.id = %s
+                """.formatted(internalId);
+
+        final String formmatedQuery = String.format("{\"q\": \"%s\"}", queryStr.replaceAll("\\s+", " ").trim());
+
+        CustomerResDto res = webClient
+                .post()
+                .uri("/query/v1/suiteql")
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .header("Prefer", "transient")
+                .bodyValue(formmatedQuery)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body ->
+                                        Mono.error(new RuntimeException("Client Error: " + response.statusCode() + " - " + body))
+                                )
+                )
+                .onStatus(HttpStatusCode::is5xxServerError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body ->
+                                        Mono.error(new RuntimeException("Server error: " + response.statusCode() + " - " + body))
+                                )
+                ).bodyToMono(CustomerResDto.class)
+                .block();
+
+        if (res == null) {
+            throw new RuntimeException("Failed to fetch ns customers: empty response");
+        }
+
+        return res.getItems();
+    }
 }

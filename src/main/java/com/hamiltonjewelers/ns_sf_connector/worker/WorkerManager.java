@@ -2,6 +2,7 @@ package com.hamiltonjewelers.ns_sf_connector.worker;
 
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.service.SyncJobService;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.SyncExecutor;
 import com.hamiltonjewelers.ns_sf_connector.utils.WorkerIdGenerator;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -17,14 +18,17 @@ import java.util.concurrent.Executors;
 @Component
 public class WorkerManager {
     private final SyncJobService syncJobService;
+    private final SyncExecutor syncExecutor;
     private final int workerCount;
     private final int claimLimit;
     private final ExecutorService executor;
 
     public WorkerManager(SyncJobService syncJobService,
+                         SyncExecutor syncExecutor,
                          @Value("${app.worker.count:4}") int workerCount,
                          @Value("${app.worker.claim.limit:10}") int claimLimit) {
         this.syncJobService = syncJobService;
+        this.syncExecutor = syncExecutor;
         this.workerCount = Math.max(1, workerCount);
         this.claimLimit = Math.max(1, claimLimit);
         this.executor = Executors.newFixedThreadPool(workerCount);
@@ -97,6 +101,8 @@ public class WorkerManager {
                             System.out.printf("[%s] Processing job %s...%n", workerId, job.getId());
                             // Simulate work (remove in real code)
                             Thread.sleep(500); // simulate some work
+
+                            syncExecutor.execute(job);
 
                             System.out.printf("[%s] Successfully processed job %s%n", workerId, job.getId());
                             // TODO: update job status to COMPLETED via syncJobService
