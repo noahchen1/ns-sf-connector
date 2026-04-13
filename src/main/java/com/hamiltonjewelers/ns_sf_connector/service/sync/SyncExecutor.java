@@ -19,15 +19,18 @@ public class SyncExecutor {
     private final NsAuthClient nsAuthClient;
     private final SfAuthClient sfAuthClient;
     private final NsCustomerClient nsCustomerClient;
+    private final SfAccountClient sfAccountClient;
 
     public SyncExecutor(
             NsAuthClient nsAuthClient,
             SfAuthClient sfAuthClient,
-            NsCustomerClient nsCustomerClient
+            NsCustomerClient nsCustomerClient,
+            SfAccountClient sfAccountClient
     ) {
         this.nsAuthClient = nsAuthClient;
         this.sfAuthClient = sfAuthClient;
         this.nsCustomerClient = nsCustomerClient;
+        this.sfAccountClient = sfAccountClient;
     }
 
     public void execute(SyncJob job) {
@@ -69,14 +72,25 @@ public class SyncExecutor {
         }
 
         String nsToken = nsAuthClient.fetchAccessToken();
+        String sfToken = sfAuthClient.fetchAccessToken();
 
         CustomerItemDto customer = nsCustomerClient.getCustomer(nsToken,
                 job.getSourceRecordId()).getFirst();
 
-        System.out.printf("Found customer with id: %s",
+        System.out.printf("Found customer with id: %s%n",
                 job.getSourceRecordId());
 
-        System.out.printf("Customer read to be processed: %s", customer);
+        System.out.printf("Customer read to be processed: %s%n", customer);
+
+        Map<String, Object> accountFields = new HashMap<>();
+        accountFields.put("Name",
+                customer.getFirstname() + " " + customer.getLastname());
+        accountFields.put("First_Name__c", customer.getFirstname());
+        accountFields.put("Last_Name__c", customer.getLastname());
+        accountFields.put("Netsuite_Id__c", String.valueOf(customer.getInternalId()));
+        accountFields.put("Account_Email__c", customer.getEmail());
+
+        String response = sfAccountClient.createAccount(sfToken, accountFields);
     }
 }
 

@@ -66,10 +66,24 @@ public class SfAccountClient {
                 .header("Authorization", "Bearer " + accessToken)
                 .bodyValue(accountFields)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body ->
+                                        Mono.error(new RuntimeException("Client Error: " + response.statusCode() + " - " + body))
+                                )
+                )
+                .onStatus(HttpStatusCode::is5xxServerError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body ->
+                                        Mono.error(new RuntimeException("Server error: " + response.statusCode() + " - " + body))
+                                )
+                )
                 .bodyToMono(String.class)
                 .block();
 
-        System.out.println(res);
+        System.out.printf("SF Account Creation Response: %s%n", res);
+
+//        {"id":"001bm00001fincnAAA","success":true,"errors":[]}
         return res;
     }
 
