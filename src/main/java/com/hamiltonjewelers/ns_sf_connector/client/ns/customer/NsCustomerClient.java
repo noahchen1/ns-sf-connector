@@ -16,7 +16,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -57,36 +60,7 @@ public class NsCustomerClient {
                     customer.datecreated DESC
                 """.formatted(formattedDate);
 
-        final String formmatedQuery = String.format("{\"q\": \"%s\"}", queryStr.replaceAll("\\s+", " ").trim());
-
-        System.out.println("formmatedQuery: " + formmatedQuery);
-        CustomerResDto res = webClient
-                .post()
-                .uri("/query/v1/suiteql")
-                .header("Authorization", "Bearer " + accessToken)
-                .header("Content-Type", "application/json")
-                .header("Prefer", "transient")
-                .bodyValue(formmatedQuery)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, response ->
-                        response.bodyToMono(String.class)
-                                .flatMap(body ->
-                                        Mono.error(new RuntimeException("Client Error: " + response.statusCode() + " - " + body))
-                                )
-                )
-                .onStatus(HttpStatusCode::is5xxServerError, response ->
-                        response.bodyToMono(String.class)
-                                .flatMap(body ->
-                                        Mono.error(new RuntimeException("Server error: " + response.statusCode() + " - " + body))
-                                )
-                ).bodyToMono(CustomerResDto.class)
-                .block();
-
-        if (res == null) {
-            throw new RuntimeException("Failed to fetch ns customers: empty response");
-        }
-
-        return res.getItems();
+        return executeQuery(queryStr, accessToken);
     }
 
     public List<CustomerItemDto> getCustomer(String accessToken, String internalId) {
@@ -102,6 +76,44 @@ public class NsCustomerClient {
                     WHERE customer.id = %s
                 """.formatted(internalId);
 
+        return executeQuery(queryStr, accessToken);
+    }
+
+    public List<CustomerItemDto> getCustomersByInternalIds(String accessToken, Set<Integer> internalIds) {
+        if (internalIds == null || internalIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String idList = internalIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(", "));
+
+        final String queryStr = """
+                SELECT
+                customer.id AS internalId,
+                customer.entityId AS custId,
+                customer.lastName AS lastname,
+                customer.firstName AS firstname,
+                customer.custentity_sfid AS sfid,
+                customer.email AS email,
+                TO_CHAR(customer.lastmodifieddate, 'YYYY-MM-DD HH24:MI:SS') AS lastmodifieddate,
+                CustomerSubsidiaryRelationship.subsidiary AS subsidiary,
+                entityAddress.addrText AS address
+                FROM
+                customer
+                LEFT JOIN CustomerSubsidiaryRelationship ON Customer.ID = CustomerSubsidiaryRelationship.entity
+                AND CustomerSubsidiaryRelationship.isprimarysub = 'T'
+                LEFT JOIN entityAddressbook ON entityAddressbook.entity = customer.id
+                AND entityAddressbook.defaultbilling = 'T'
+                LEFT JOIN entityAddress ON entityAddress.nkey = entityAddressbook.AddressBookAddress
+                LEFT JOIN employee ON employee.id = customer.salesrep
+                WHERE customer.id IN (%s)
+            """.formatted(idList);
+
+        return executeQuery(queryStr, accessToken);
+    }
+
+    private List<CustomerItemDto> executeQuery(String queryStr, String accessToken) {
         final String formmatedQuery = String.format("{\"q\": \"%s\"}", queryStr.replaceAll("\\s+", " ").trim());
 
         CustomerResDto res = webClient
@@ -130,6 +142,6 @@ public class NsCustomerClient {
             throw new RuntimeException("Failed to fetch ns customers: empty response");
         }
 
-        return res.getItems();
+        return res.getItems() != null ? res.getItems() : Collections.emptyList();
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class SyncJobFactory {
@@ -37,25 +36,53 @@ public class SyncJobFactory {
         String sfToken = sfAuthClient.fetchAccessToken();
 
         LocalDateTime since = LocalDateTime.now().minusHours(1);
-
-        List<CustomerItemDto> customers = nsCustomerClient.getCustomers(nsToken, since);
-        List<AccountDto.AccountRecord> accounts = sfAccountClient.getAccounts(sfToken, since);
-
-        Map<Integer, CustomerItemDto> nsMap = customers.stream()
-                .filter(c -> c.getInternalId() != null)
-                .collect(Collectors.toMap(CustomerItemDto::getInternalId, c -> c));
-
-        Map<Integer, AccountDto.AccountRecord> sfMap = accounts.stream()
-                .collect(Collectors.toMap(AccountDto.AccountRecord::getNetsuiteId, c -> c));
-
-        Set<Integer> allKeys = Stream.concat(nsMap.keySet().stream(), sfMap.keySet().stream()).collect(Collectors.toSet());
-
         LocalDateTime now = LocalDateTime.now();
 
-        return allKeys.stream()
-                .map(key -> buildJob(key, nsMap.get(key), sfMap.get(key), now))
-                .filter(Objects::nonNull)
-                .toList();
+        List<SyncJob> jobs = new ArrayList<>();
+
+        List<CustomerItemDto> nsChanged = nsCustomerClient.getCustomers(nsToken, since);
+        Map<Integer, CustomerItemDto> nsChangedMap = nsChanged.stream()
+                .filter(c -> c.getInternalId() != null)
+                .collect(Collectors.toMap(CustomerItemDto::getInternalId, c -> c, (a, b) -> a));
+        Map<Integer, AccountDto.AccountRecord> sfLookupMap = sfAccountClient
+                .getAccountsByNetsuiteIds(sfToken, nsChangedMap.keySet())
+                .stream()
+                .filter(a -> a.getNetsuiteId() != null)
+                .collect(Collectors.toMap(AccountDto.AccountRecord::getNetsuiteId, a -> a, (a, b) -> a));
+
+        for (Integer netsuiteId : nsChangedMap.keySet()) {
+            SyncJob job = buildJob(
+                    netsuiteId,
+                    nsChangedMap.get(netsuiteId),
+                    sfLookupMap.get(netsuiteId),
+                    now
+            );
+
+            if (job != null) jobs.add(job);
+        }
+
+        List<AccountDto.AccountRecord> sfChanged = sfAccountClient.getAccounts(sfToken, since);
+        Map<Integer, AccountDto.AccountRecord> sfChangedMap = sfChanged.stream()
+                .filter(a -> a.getNetsuiteId() != null)
+                .collect(Collectors.toMap(AccountDto.AccountRecord::getNetsuiteId, a -> a, (a, b) -> a));
+
+        Map<Integer, CustomerItemDto> nsLookupMap = nsCustomerClient
+                .getCustomersByInternalIds(nsToken, sfChangedMap.keySet())
+                .stream()
+                .filter(c -> c.getInternalId() != null)
+                .collect(Collectors.toMap(CustomerItemDto::getInternalId, c -> c, (a, b) -> a));
+
+        for (Integer netsuiteId : sfChangedMap.keySet()) {
+            SyncJob job = buildJob(
+                    netsuiteId,
+                    nsLookupMap.get(netsuiteId),
+                    sfChangedMap.get(netsuiteId),
+                    now
+            );
+            if (job != null) jobs.add(job);
+        }
+
+        return jobs;
     }
 
     private SyncJob buildJob(

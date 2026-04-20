@@ -1,5 +1,6 @@
 package com.hamiltonjewelers.ns_sf_connector.dto.sf.account;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
@@ -53,6 +54,7 @@ public class AccountDto {
         private String email;
 
         @JsonProperty("LastModifiedDate")
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
         private LocalDateTime lastModifiedDate;
 
         public Attributes getAttributes() {

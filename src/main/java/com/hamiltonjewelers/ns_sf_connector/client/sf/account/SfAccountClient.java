@@ -11,8 +11,11 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class SfAccountClient {
@@ -42,36 +45,31 @@ public class SfAccountClient {
                 LIMIT 5
             """.formatted(formattedDate);
 
-        AccountDto res = webClient
-                .get()
-                .uri("/data/v64.0/query", uriBuilder -> uriBuilder
-                        .queryParam("q", queryStr.replaceAll("\\s+", " ").trim())
-                        .build())
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + accessToken)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, response ->
-                        response.bodyToMono(String.class)
-                                .flatMap(body ->
-                                        Mono.error(new RuntimeException("Client Error: " + response.statusCode() + " - " + body))
-                                )
-                )
-                .onStatus(HttpStatusCode::is5xxServerError, response ->
-                        response.bodyToMono(String.class)
-                                .flatMap(body ->
-                                        Mono.error(new RuntimeException("Server error: " + response.statusCode() + " - " + body))
-                                )
-                )
-                .bodyToMono(AccountDto.class)
-                .block();
+            return executeQuery(queryStr, accessToken);
+    }
 
-        System.out.println(res);
-
-        if (res == null) {
-            throw new RuntimeException("Failed to fetch accounts: empty response");
+    public List<AccountDto.AccountRecord> getAccountsByNetsuiteIds(String accessToken, Set<Integer> netsuiteIds) {
+        if (netsuiteIds == null || netsuiteIds.isEmpty()) {
+            return List.of();
         }
 
-        return res.getRecords();
+        String idList = netsuiteIds.stream()
+                .map(netsuiteId -> "'" + String.valueOf(netsuiteId) + "'")
+                .collect(Collectors.joining(", "));
+
+        final String queryStr = """
+            SELECT
+            Id,
+            Netsuite_Id__c,
+            First_Name__c,
+            Last_Name__c,
+            Account_Email__c,
+            LastModifiedDate
+            FROM Account
+            WHERE Netsuite_Id__c IN (%s)
+        """.formatted(idList);
+
+        return executeQuery(queryStr, accessToken);
     }
 
     public String createAccount(String accessToken, Map<String, Object> accountFields) {
@@ -103,4 +101,36 @@ public class SfAccountClient {
         return res;
     }
 
+    private List<AccountDto.AccountRecord> executeQuery(String queryStr, String accessToken) {
+        AccountDto res = webClient
+                .get()
+                .uri("/data/v64.0/query", uriBuilder -> uriBuilder
+                        .queryParam("q", queryStr.replaceAll("\\s+", " ").trim())
+                        .build())
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + accessToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body ->
+                                        Mono.error(new RuntimeException("Client Error: " + response.statusCode() + " - " + body))
+                                )
+                )
+                .onStatus(HttpStatusCode::is5xxServerError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body ->
+                                        Mono.error(new RuntimeException("Server error: " + response.statusCode() + " - " + body))
+                                )
+                )
+                .bodyToMono(AccountDto.class)
+                .block();
+
+        System.out.println(res);
+
+        if (res == null) {
+            throw new RuntimeException("Failed to fetch accounts: empty response");
+        }
+
+        return res.getRecords() != null ? res.getRecords() : Collections.emptyList();
+    }
 }
