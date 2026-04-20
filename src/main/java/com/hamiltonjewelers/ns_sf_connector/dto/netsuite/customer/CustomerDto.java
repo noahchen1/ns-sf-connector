@@ -1,11 +1,9 @@
 package com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CustomerDto {
