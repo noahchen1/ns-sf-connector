@@ -2,6 +2,7 @@ package com.hamiltonjewelers.ns_sf_connector.dto.sf.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class AccountDto {
@@ -51,6 +52,9 @@ public class AccountDto {
         @JsonProperty("Account_Email__c")
         private String email;
 
+        @JsonProperty("LastModifiedDate")
+        private LocalDateTime lastModifiedDate;
+
         public Attributes getAttributes() {
             return attributes;
         }
@@ -82,6 +86,10 @@ public class AccountDto {
         public String getEmail() { return email; }
 
         public void setEmail(String email) { this.email = email; }
+
+        public LocalDateTime getLastModifiedDate() { return lastModifiedDate; }
+
+        public void setLastModifiedDate(LocalDateTime lastModifiedDate) { this.lastModifiedDate = lastModifiedDate; }
 
         @Override
         public String toString() {

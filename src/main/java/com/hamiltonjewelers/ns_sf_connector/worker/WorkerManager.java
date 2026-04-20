@@ -102,7 +102,7 @@ public class WorkerManager {
                             // Simulate work (remove in real code)
                             Thread.sleep(500); // simulate some work
 
-                            syncExecutor.execute(job);
+//                            syncExecutor.execute(job);
 
                             System.out.printf("[%s] Successfully processed job %s%n", workerId, job.getId());
                             // TODO: update job status to COMPLETED via syncJobService

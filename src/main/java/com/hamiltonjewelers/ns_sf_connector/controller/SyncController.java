@@ -44,8 +44,8 @@ public class SyncController {
         String nsToken = nsAuthClient.fetchAccessToken();
         String sfToken = sfAuthClient.fetchAccessToken();
 
-        List<CustomerItemDto> customers = nsCustomerClient.getCustomers(nsToken);
-        List<AccountDto.AccountRecord> accounts = sfAccountClient.getAccounts(sfToken);
+        List<CustomerItemDto> customers = nsCustomerClient.getCustomers(nsToken, LocalDateTime.now().minusHours(1));
+        List<AccountDto.AccountRecord> accounts = sfAccountClient.getAccounts(sfToken, LocalDateTime.now().minusHours(1));
 
         Map<Integer, CustomerItemDto> nsMap = customers.stream()
                 .collect(Collectors.toMap(CustomerDto::getInternalId, c -> c));

@@ -8,6 +8,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -21,10 +24,23 @@ public class SfAccountClient {
         this.webClient = webClientBuilder.baseUrl(config.getBaseUrl()).build();
     }
 
-    public List<AccountDto.AccountRecord> getAccounts(String accessToken) {
+    public List<AccountDto.AccountRecord> getAccounts(String accessToken, LocalDateTime since) {
+        final String formattedDate = since
+                .atOffset(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
+
         final String queryStr = """
-                SELECT Id, Netsuite_Id__c, First_Name__c, Last_Name__c, Account_Email__c FROM ACCOUNT WHERE Netsuite_Id__c != null LIMIT 5
-            """;
+                SELECT
+                Id,
+                Netsuite_Id__c,
+                First_Name__c,
+                Last_Name__c,
+                Account_Email__c,
+                LastModifiedDate
+                FROM ACCOUNT
+                WHERE LastModifiedDate >= %s
+                LIMIT 5
+            """.formatted(formattedDate);
 
         AccountDto res = webClient
                 .get()

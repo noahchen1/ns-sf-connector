@@ -14,7 +14,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+
 
 @Component
 public class NsCustomerClient {
@@ -26,7 +29,8 @@ public class NsCustomerClient {
         this.webClient = webClientBuilder.baseUrl(config.getBaseUrl()).build();
     }
 
-    public List<CustomerItemDto> getCustomers(String accessToken) {
+    public List<CustomerItemDto> getCustomers(String accessToken, LocalDateTime since) {
+        final String formattedDate = since.format(DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss"));
         final String queryStr = """
                     SELECT TOP(5)
                     customer.id AS internalId,
@@ -35,6 +39,7 @@ public class NsCustomerClient {
                     customer.firstName AS firstname,
                     customer.custentity_sfid AS sfid,
                     customer.email AS email,
+                    TO_CHAR(customer.lastmodifieddate, 'YYYY-MM-DD HH24:MI:SS') AS lastmodifieddate,
                     CustomerSubsidiaryRelationship.subsidiary AS subsidiary,
                     entityAddress.addrText AS address
                     FROM
@@ -47,11 +52,14 @@ public class NsCustomerClient {
                     LEFT JOIN employee ON employee.id = customer.salesrep
                     WHERE
                     TO_DATE (customer.datecreated, 'MM-DD-YYYY') BETWEEN '11-01-2025' AND '11-30-2025'
+                    AND customer.lastmodifieddate >= TO_DATE('%s', 'MM/DD/YYYY HH24:MI:SS')
                     ORDER BY
                     customer.datecreated DESC
-                """;
+                """.formatted(formattedDate);
+
         final String formmatedQuery = String.format("{\"q\": \"%s\"}", queryStr.replaceAll("\\s+", " ").trim());
 
+        System.out.println("formmatedQuery: " + formmatedQuery);
         CustomerResDto res = webClient
                 .post()
                 .uri("/query/v1/suiteql")

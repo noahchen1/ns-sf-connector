@@ -106,14 +106,14 @@ public class SyncJobService {
         if (existing != null) {
             existing.setLastSuccessfulAt(LocalDateTime.now());
 
-            List<SyncJob> toInsertIntoSf = syncJobFactory.buildCustomerInsertJobs();
+            List<SyncJob> toInsertIntoSf = syncJobFactory.buildCustomerSyncJobs();
             List<SyncJob> results = createSyncJobs(toInsertIntoSf);
 
             System.out.printf("Scheduled sync job results: %s!%n", results);
 
             return scheduledSyncJobRepository.save(existing);
         } else {
-            List<SyncJob> toInsertIntoSf = syncJobFactory.buildCustomerInsertJobs();
+            List<SyncJob> toInsertIntoSf = syncJobFactory.buildCustomerSyncJobs();
             List<SyncJob> results = createSyncJobs(toInsertIntoSf);
 
             System.out.printf("New Scheduled sync job results: %s!%n",

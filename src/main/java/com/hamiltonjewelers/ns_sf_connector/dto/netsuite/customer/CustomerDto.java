@@ -1,7 +1,10 @@
 package com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -11,6 +14,10 @@ public class CustomerDto {
 
     @JsonProperty("custid")
     private String custId;
+
+    @JsonProperty("lastmodifieddate")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime lastModifiedDate;
 
     private String email;
     private String firstname;
@@ -54,6 +61,8 @@ public class CustomerDto {
         return rowId;
     }
 
+    public LocalDateTime getLastModifiedDate() { return lastModifiedDate; }
+
     public void setInternalId(int internal_id) {
         this.internalId = internal_id;
     }
@@ -87,6 +96,8 @@ public class CustomerDto {
     }
 
     public void setSfid(String sfid) { this.sfid = sfid; }
+
+    public void setLastModifiedDate(LocalDateTime lastModifiedDate) { this.lastModifiedDate = lastModifiedDate; }
 
     @Override
     public String toString() {
