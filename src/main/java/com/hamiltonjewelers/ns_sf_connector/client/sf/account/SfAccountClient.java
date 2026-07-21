@@ -35,6 +35,7 @@ public class SfAccountClient {
         final String queryStr = """
                 SELECT
                 Id,
+                Name,
                 Netsuite_Id__c,
                 First_Name__c,
                 Last_Name__c,
@@ -60,6 +61,7 @@ public class SfAccountClient {
         final String queryStr = """
             SELECT
             Id,
+            Name,
             Netsuite_Id__c,
             First_Name__c,
             Last_Name__c,
@@ -99,6 +101,20 @@ public class SfAccountClient {
 
 //        {"id":"001bm00001fincnAAA","success":true,"errors":[]}
         return res;
+    }
+
+    public void updateAccount(String accessToken, String accountId, Map<String, Object> accountFields) {
+        webClient.patch()
+                .uri("/data/v64.0/sobjects/Account/{accountId}", accountId)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + accessToken)
+                .bodyValue(accountFields)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response -> response.bodyToMono(String.class)
+                        .flatMap(body -> Mono.error(new RuntimeException(
+                                "Salesforce Account update failed: " + response.statusCode() + " - " + body))))
+                .toBodilessEntity()
+                .block();
     }
 
     private List<AccountDto.AccountRecord> executeQuery(String queryStr, String accessToken) {

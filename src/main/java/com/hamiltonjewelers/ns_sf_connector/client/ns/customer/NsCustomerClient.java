@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,8 +55,7 @@ public class NsCustomerClient {
                     LEFT JOIN entityAddress ON entityAddress.nkey = entityAddressbook.AddressBookAddress
                     LEFT JOIN employee ON employee.id = customer.salesrep
                     WHERE
-                    TO_DATE (customer.datecreated, 'MM-DD-YYYY') BETWEEN '11-01-2025' AND '11-30-2025'
-                    AND customer.lastmodifieddate >= TO_DATE('%s', 'MM/DD/YYYY HH24:MI:SS')
+                    customer.lastmodifieddate >= TO_DATE('%s', 'MM/DD/YYYY HH24:MI:SS')
                     ORDER BY
                     customer.datecreated DESC
                 """.formatted(formattedDate);
@@ -71,12 +71,27 @@ public class NsCustomerClient {
                     customer.lastName AS lastname,
                     customer.firstName AS firstname,
                     customer.email AS email,
+                    TO_CHAR(customer.lastmodifieddate, 'YYYY-MM-DD HH24:MI:SS') AS lastmodifieddate
                     FROM
                     customer
                     WHERE customer.id = %s
                 """.formatted(internalId);
 
         return executeQuery(queryStr, accessToken);
+    }
+
+    public void updateCustomer(String accessToken, String internalId, Map<String, Object> customerFields) {
+        webClient.patch()
+                .uri("/record/v1/customer/{internalId}", internalId)
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .bodyValue(customerFields)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response -> response.bodyToMono(String.class)
+                        .flatMap(body -> Mono.error(new RuntimeException(
+                                "NetSuite Customer update failed: " + response.statusCode() + " - " + body))))
+                .toBodilessEntity()
+                .block();
     }
 
     public List<CustomerItemDto> getCustomersByInternalIds(String accessToken, Set<Integer> internalIds) {

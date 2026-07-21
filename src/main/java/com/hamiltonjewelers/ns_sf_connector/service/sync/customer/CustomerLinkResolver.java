@@ -1,0 +1,24 @@
+package com.hamiltonjewelers.ns_sf_connector.service.sync.customer;
+
+import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.SyncRoute;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomerLinkResolver {
+    public int resolveNetsuiteCustomerId(SyncJob job, SyncRoute route) {
+        String candidate = "NETSUITE".equals(route.sourceSystem())
+                ? job.getSourceRecordId()
+                : job.getTargetRecordId();
+
+        if (candidate == null || candidate.isBlank()) {
+            throw new IllegalArgumentException("Cannot resolve NetSuite customer ID for sync job " + job.getId());
+        }
+
+        try {
+            return Integer.parseInt(candidate);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid NetSuite customer ID: " + candidate, e);
+        }
+    }
+}

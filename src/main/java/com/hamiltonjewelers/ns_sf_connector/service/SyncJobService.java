@@ -92,6 +92,64 @@ public class SyncJobService {
         return syncJobRepository.findAllById(ids);
     }
 
+    /**
+     * A superseded job must have been claimed by a worker. Failing fast here
+     * prevents a stale worker from enqueueing a reconcile after another worker
+     * has already changed the job state.
+     */
+    @Transactional
+    public void markSuperseded(UUID jobId, String reason) {
+        Objects.requireNonNull(jobId, "jobId must not be null");
+        Objects.requireNonNull(reason, "reason must not be null");
+
+        if (syncJobRepository.markSuperseded(jobId, reason) != 1) {
+            throw new IllegalStateException("Only a PROCESSING job can be superseded: " + jobId);
+        }
+    }
+
+    /**
+     * Coalesce concurrent stale-job detections into one active reconcile job.
+     * A completed reconcile is deliberately not reused: a later conflict must
+     * be reconciled again.
+     */
+    @Transactional
+    public SyncJob enqueueReconcileJob(String recordType, String sourceRecordId,
+                                       String targetRecordId, UUID supersededJobId) {
+        Objects.requireNonNull(recordType, "recordType must not be null");
+        Objects.requireNonNull(sourceRecordId, "sourceRecordId must not be null");
+        Objects.requireNonNull(supersededJobId, "supersededJobId must not be null");
+
+        Optional<SyncJob> activeJob = syncJobRepository
+                .findFirstBySourceSystemAndRecordTypeAndSourceRecordIdAndOperationAndStatusIn(
+                        "SYSTEM", recordType, sourceRecordId, "RECONCILE", List.of("PENDING", "PROCESSING"));
+        if (activeJob.isPresent()) return activeJob.get();
+
+        SyncJob job = new SyncJob();
+        job.setId(UUID.randomUUID());
+        job.setSourceSystem("SYSTEM");
+        job.setTargetSystem("SYSTEM");
+        job.setRecordType(recordType);
+        job.setSourceRecordId(sourceRecordId);
+        job.setTargetRecordId(targetRecordId);
+        job.setSyncType("RECONCILE");
+        job.setOperation("RECONCILE");
+        job.setPriority(10);
+        job.setStatus("PENDING");
+        job.setAttemptCount(0);
+        job.setMaxAttempts(5);
+        job.setAvailableAt(LocalDateTime.now());
+        job.setErrorMessage("Queued after superseding job " + supersededJobId);
+        return syncJobRepository.save(job);
+    }
+
+    /** Keeps superseding the stale work and enqueuing its replacement atomic. */
+    @Transactional
+    public SyncJob supersedeAndEnqueueReconcileJob(UUID jobId, String reason, String recordType,
+                                                    String sourceRecordId, String targetRecordId) {
+        markSuperseded(jobId, reason);
+        return enqueueReconcileJob(recordType, sourceRecordId, targetRecordId, jobId);
+    }
+
     @Transactional
     public ScheduledSyncJob createScheduledSyncJob(ScheduledSyncJob newJob) {
         Objects.requireNonNull(newJob, "new scheduled job must not be null");

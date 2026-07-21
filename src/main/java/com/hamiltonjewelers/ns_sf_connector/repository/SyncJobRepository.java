@@ -38,6 +38,19 @@ public interface SyncJobRepository extends JpaRepository<SyncJob, UUID> {
             nativeQuery = true)
     int claimByIds(@Param("ids") List<UUID> ids, @Param("status") String status, @Param("workerId") String workerId);
 
+    @Modifying
+    @Query(value = "UPDATE sync_job SET status = 'SUPERSEDED', error_message = :reason, updated_at = now() "
+            + "WHERE id = :id AND status = 'PROCESSING'", nativeQuery = true)
+    int markSuperseded(@Param("id") UUID id, @Param("reason") String reason);
+
+    Optional<SyncJob> findFirstBySourceSystemAndRecordTypeAndSourceRecordIdAndOperationAndStatusIn(
+            String sourceSystem,
+            String recordType,
+            String sourceRecordId,
+            String operation,
+            List<String> statuses
+    );
+
     @Query(value = """
         SELECT target_system, record_type, operation, COUNT(*) AS count, MIN(available_at) AS available_at
         FROM sync_job

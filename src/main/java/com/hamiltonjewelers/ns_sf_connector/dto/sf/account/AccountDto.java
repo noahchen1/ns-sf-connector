@@ -41,6 +41,9 @@ public class AccountDto {
         @JsonProperty("Id")
         private String Id;
 
+        @JsonProperty("Name")
+        private String name;
+
         @JsonProperty("Netsuite_Id__c")
         private Integer netsuiteId;
 
@@ -72,6 +75,10 @@ public class AccountDto {
         public void setId(String Id) {
             this.Id = Id;
         }
+
+        public String getName() { return name; }
+
+        public void setName(String name) { this.name = name; }
 
         public Integer getNetsuiteId() { return netsuiteId; }
 
