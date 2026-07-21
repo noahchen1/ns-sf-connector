@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.7</version>
+		<version>4.0.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.hamiltonjewelers</groupId>
 	<artifactId>ns-sf-connector</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>ns-sf-connector</name>
-	<description>A bi-directional data sync service between NetSuite and Salesforce</description>
+	<description>A bidirectional data sync service between NetSuite and Salesforce</description>
 	<url/>
 	<licenses>
 		<license/>
