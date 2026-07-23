@@ -1,6 +1,6 @@
 package com.hamiltonjewelers.ns_sf_connector;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.auth.NsAuthClient;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.customer.NsCustomerClient;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.item.invLocation.NsInvLocationClient;

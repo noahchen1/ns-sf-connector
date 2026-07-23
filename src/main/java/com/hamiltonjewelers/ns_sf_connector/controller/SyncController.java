@@ -1,8 +1,7 @@
 package com.hamiltonjewelers.ns_sf_connector.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.auth.NsAuthClient;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.customer.NsCustomerClient;
 import com.hamiltonjewelers.ns_sf_connector.client.sf.account.SfAccountClient;

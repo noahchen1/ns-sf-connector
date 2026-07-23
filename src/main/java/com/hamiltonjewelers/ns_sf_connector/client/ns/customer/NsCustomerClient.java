@@ -1,6 +1,6 @@
 package com.hamiltonjewelers.ns_sf_connector.client.ns.customer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.hamiltonjewelers.ns_sf_connector.config.NsConfig;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerResDto;

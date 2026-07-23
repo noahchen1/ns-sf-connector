@@ -1,6 +1,6 @@
 package com.hamiltonjewelers.ns_sf_connector.client.sf.invLocation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.hamiltonjewelers.ns_sf_connector.config.SfConfig;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;

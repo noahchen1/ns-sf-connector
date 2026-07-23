@@ -1,7 +1,7 @@
 package com.hamiltonjewelers.ns_sf_connector.client.ns.item.invLocation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.hamiltonjewelers.ns_sf_connector.config.NsConfig;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.invLocation.NsInvLocationResponseDto;
 import org.springframework.http.HttpStatusCode;
@@ -80,7 +80,7 @@ public class NsInvLocationClient {
 
             try {
                 System.out.println("API Response: " + mapper.writeValueAsString(res));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new RuntimeException(e);
             }
 
