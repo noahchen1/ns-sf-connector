@@ -1,26 +1,22 @@
 package com.hamiltonjewelers.ns_sf_connector.repository;
 
-import com.hamiltonjewelers.ns_sf_connector.model.ScheduledSyncJob;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface SyncJobRepository extends JpaRepository<SyncJob, UUID> {
-    Optional<SyncJob> findBySourceSystemAndRecordTypeAndSourceRecordIdAndOperation(
+    Optional<SyncJob> findFirstBySourceSystemAndRecordTypeAndSourceRecordIdAndOperationAndStatusIn(
             String sourceSystem,
             String recordType,
             String sourceRecordId,
-            String operation
+            String operation,
+            List<String> statuses
     );
 
     @Query(value = "SELECT * FROM sync_job "
@@ -43,13 +39,12 @@ public interface SyncJobRepository extends JpaRepository<SyncJob, UUID> {
             + "WHERE id = :id AND status = 'PROCESSING'", nativeQuery = true)
     int markSuperseded(@Param("id") UUID id, @Param("reason") String reason);
 
-    Optional<SyncJob> findFirstBySourceSystemAndRecordTypeAndSourceRecordIdAndOperationAndStatusIn(
-            String sourceSystem,
-            String recordType,
-            String sourceRecordId,
-            String operation,
-            List<String> statuses
-    );
+    @Modifying
+    @Query(value = "UPDATE sync_job SET status = 'COMPLETED', claimed_at = NULL, claimed_by = NULL, "
+            + "error_message = NULL, updated_at = now() "
+            + "WHERE id = :id AND status = 'PROCESSING' AND claimed_by = :workerId",
+            nativeQuery = true)
+    int markCompleted(@Param("id") UUID id, @Param("workerId") String workerId);
 
     @Query(value = """
         SELECT target_system, record_type, operation, COUNT(*) AS count, MIN(available_at) AS available_at

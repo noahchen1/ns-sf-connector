@@ -1,137 +1,24 @@
 package com.hamiltonjewelers.ns_sf_connector.controller;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import com.hamiltonjewelers.ns_sf_connector.client.ns.auth.NsAuthClient;
-import com.hamiltonjewelers.ns_sf_connector.client.ns.customer.NsCustomerClient;
-import com.hamiltonjewelers.ns_sf_connector.client.sf.account.SfAccountClient;
-import com.hamiltonjewelers.ns_sf_connector.client.sf.auth.SfAuthClient;
-import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerDto;
-import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
-import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
-import com.hamiltonjewelers.ns_sf_connector.service.SyncJobService;
-import com.hamiltonjewelers.ns_sf_connector.utils.WorkerIdGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.discovery.customer.CustomerSyncCoordinator;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/sync")
 public class SyncController {
-    @Autowired
-    private NsCustomerClient nsCustomerClient;
-    @Autowired
-    private SfAccountClient sfAccountClient;
-    @Autowired
-    private NsAuthClient nsAuthClient;
-    @Autowired
-    private SfAuthClient sfAuthClient;
-    @Autowired
-    private SyncJobService syncJobService;
+    private final CustomerSyncCoordinator customerSyncCoordinator;
 
-    @PostMapping
-    public void syncClients() {
-        String nsToken = nsAuthClient.fetchAccessToken();
-        String sfToken = sfAuthClient.fetchAccessToken();
-
-        List<CustomerItemDto> customers = nsCustomerClient.getCustomers(nsToken, LocalDateTime.now().minusHours(1));
-        List<AccountDto.AccountRecord> accounts = sfAccountClient.getAccounts(sfToken, LocalDateTime.now().minusHours(1));
-
-        Map<Integer, CustomerItemDto> nsMap = customers.stream()
-                .collect(Collectors.toMap(CustomerDto::getInternalId, c -> c));
-
-        Map<Integer, AccountDto.AccountRecord> sfMap = accounts.stream()
-                .collect(Collectors.toMap(AccountDto.AccountRecord::getNetsuiteId, c -> c));
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        List<SyncJob> toInsertIntoSf = nsMap.keySet().stream()
-                .filter(netsuiteId -> !sfMap.containsKey(netsuiteId))
-                .map(nsMap::get)
-                .map(customer -> {
-
-                    String internalId = String.valueOf(customer.getInternalId());
-
-                    SyncJob job = new SyncJob();
-                    job.setSourceSystem("Netsuite");
-                    job.setTargetSystem("Salesforce");
-                    job.setRecordType("Customer");
-                    job.setSourceRecordId(internalId);
-                    job.setTargetRecordId(null);
-                    job.setSyncType("REALTIME");
-                    job.setOperation("INSERT");
-                    job.setPriority(5);
-                    job.setStatus("PENDING");
-                    job.setAttemptCount(0);
-                    job.setMaxAttempts(5);
-                    job.setAvailableAt(LocalDateTime.now());
-                    job.setClaimedAt(null);
-                    job.setClaimedBy(null);
-                    job.setErrorMessage(null);
-
-                    return job;
-
-                }).toList();
-
-        List<SyncJob> results = syncJobService.createSyncJobs(toInsertIntoSf);
-
-
-
-//        Map<String, Object> accountFields = Map.of(
-//                "Name", "Test Account",
-//                "First_Name__c", "First",
-//                "Last_Name__c", "Last",
-//                "Netsuite_Id__c", "123456",
-//                "Account_Email__c", "testemail@gmail.com"
-//        );
-//
-//        sfAccountClient.createAccount(sfToken, accountFields);
-
-
-//        Map<String, Object> payload = new HashMap<>();
-//        payload.put("customerName", "John Doe");
-//        payload.put("email", "john.doe@example.com");
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        JsonNode payloadJson = objectMapper.convertValue(payload, JsonNode.class);
-//
-//        System.out.println(payload);
-//        System.out.println(payloadJson);
-//
-//        SyncJob syncJob = new SyncJob();
-//        syncJob.setSourceSystem("ERP");
-//        syncJob.setTargetSystem("CRM");
-//        syncJob.setRecordType("Customer");
-//        syncJob.setSourceRecordId("SRC12345");
-//        syncJob.setTargetRecordId("TGT67890");
-//        syncJob.setSyncType("FULL");
-//        syncJob.setOperation("INSERT");
-//        syncJob.setGroupingKey("batch-20240610");
-//        syncJob.setPriority(5);
-//        syncJob.setStatus("PENDING");
-//        syncJob.setAttemptCount(0);
-//        syncJob.setMaxAttempts(5);
-//        syncJob.setAvailableAt(LocalDateTime.parse("2024-06-10T12:00:00"));
-//        syncJob.setClaimedAt(null);
-//        syncJob.setClaimedBy(null);
-//        syncJob.setPayload(objectMapper.writeValueAsString(payloadJson));
-//        syncJob.setErrorMessage(null);
-//
-//        syncJobService.createSyncJob(syncJob);
-
+    public SyncController(CustomerSyncCoordinator customerSyncCoordinator) {
+        this.customerSyncCoordinator = customerSyncCoordinator;
     }
 
-//    private boolean recordsAreEqual(CustomerItemDto customers, AccountDto.AccountRecord accounts) {
-//
-//    }
+    @PostMapping({"", "/customers"})
+    public List<SyncJob> syncCustomers() {
+        return customerSyncCoordinator.discoverAndEnqueue();
+    }
 }
-
-

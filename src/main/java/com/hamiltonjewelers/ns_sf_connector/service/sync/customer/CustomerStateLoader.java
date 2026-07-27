@@ -18,8 +18,12 @@ public class CustomerStateLoader {
     private final NsCustomerClient nsCustomerClient;
     private final SfAccountClient sfAccountClient;
 
-    public CustomerStateLoader(NsAuthClient nsAuthClient, SfAuthClient sfAuthClient,
-                               NsCustomerClient nsCustomerClient, SfAccountClient sfAccountClient) {
+    public CustomerStateLoader(
+            NsAuthClient nsAuthClient,
+            SfAuthClient sfAuthClient,
+            NsCustomerClient nsCustomerClient,
+            SfAccountClient sfAccountClient
+    ) {
         this.nsAuthClient = nsAuthClient;
         this.sfAuthClient = sfAuthClient;
         this.nsCustomerClient = nsCustomerClient;
@@ -27,14 +31,18 @@ public class CustomerStateLoader {
     }
 
     public CustomerState load(int netsuiteId) {
-        List<CustomerItemDto> nsRows = nsCustomerClient.getCustomer(
-                nsAuthClient.fetchAccessToken(), String.valueOf(netsuiteId));
-        List<AccountDto.AccountRecord> sfRows = sfAccountClient.getAccountsByNetsuiteIds(
-                sfAuthClient.fetchAccessToken(), Set.of(netsuiteId));
-
-        return new CustomerState(
-                nsRows == null || nsRows.isEmpty() ? null : nsRows.getFirst(),
-                sfRows == null || sfRows.isEmpty() ? null : sfRows.getFirst()
+        List<CustomerItemDto> netsuiteRows = nsCustomerClient.getCustomer(
+                nsAuthClient.fetchAccessToken(),
+                String.valueOf(netsuiteId)
         );
+        List<AccountDto.AccountRecord> salesforceRows = sfAccountClient.getAccountsByNetsuiteIds(
+                sfAuthClient.fetchAccessToken(),
+                Set.of(netsuiteId)
+        );
+        return new CustomerState(firstOrNull(netsuiteRows), firstOrNull(salesforceRows));
+    }
+
+    private <T> T firstOrNull(List<T> rows) {
+        return rows == null || rows.isEmpty() ? null : rows.getFirst();
     }
 }

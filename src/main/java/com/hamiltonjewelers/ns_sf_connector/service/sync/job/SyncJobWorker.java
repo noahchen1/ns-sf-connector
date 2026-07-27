@@ -1,37 +1,36 @@
-package com.hamiltonjewelers.ns_sf_connector.worker;
+package com.hamiltonjewelers.ns_sf_connector.service.sync.job;
 
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
-import com.hamiltonjewelers.ns_sf_connector.service.SyncJobService;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.SyncExecutor;
 import com.hamiltonjewelers.ns_sf_connector.utils.WorkerIdGenerator;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Component
-public class WorkerManager {
+@ConditionalOnProperty(name = "app.worker.enabled", havingValue = "true", matchIfMissing = true)
+public class SyncJobWorker {
     private final SyncJobService syncJobService;
-    private final SyncExecutor syncExecutor;
+    private final SyncJobDispatcher dispatcher;
     private final int workerCount;
     private final int claimLimit;
     private final ExecutorService executor;
 
-    public WorkerManager(SyncJobService syncJobService,
-                         SyncExecutor syncExecutor,
+    public SyncJobWorker(SyncJobService syncJobService,
+                         SyncJobDispatcher dispatcher,
                          @Value("${app.worker.count:4}") int workerCount,
                          @Value("${app.worker.claim.limit:10}") int claimLimit) {
         this.syncJobService = syncJobService;
-        this.syncExecutor = syncExecutor;
+        this.dispatcher = dispatcher;
         this.workerCount = Math.max(1, workerCount);
         this.claimLimit = Math.max(1, claimLimit);
-        this.executor = Executors.newFixedThreadPool(workerCount);
+        this.executor = Executors.newFixedThreadPool(this.workerCount);
     }
 
     @PostConstruct
@@ -42,7 +41,7 @@ public class WorkerManager {
             final String workerId = String.format("%s-%d", baseWorkerId, i);
 
             System.out.println("Launching Worker: " + workerId);
-            executor.submit(new WorkerRunnbale(workerId));
+            executor.submit(new WorkerRunnable(workerId));
         }
     }
 
@@ -53,10 +52,10 @@ public class WorkerManager {
         System.out.println("Worker pool shutdown initiated.");
     }
 
-    private class WorkerRunnbale implements Runnable {
+    private class WorkerRunnable implements Runnable {
         private final String workerId;
 
-        private WorkerRunnbale(String workerId) {
+        private WorkerRunnable(String workerId) {
             this.workerId = workerId;
         }
 
@@ -66,9 +65,8 @@ public class WorkerManager {
 
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    Instant start = Instant.now();
                     System.out.printf("[%s] Attempting to claim up to %d jobs...%n", workerId, claimLimit);
-                    List<SyncJob> claimed = syncJobService.claimJobs(claimLimit, workerId);
+                    List<SyncJob> claimed = syncJobService.claim(claimLimit, workerId);
 
                     System.out.printf("worker %s claimed job %s...%n", workerId,
                             claimed);
@@ -97,27 +95,29 @@ public class WorkerManager {
                                 job.getStatus(),
                                 job.getAttemptCount());
                         try {
-                            // TODO: perform actual sync work here
                             System.out.printf("[%s] Processing job %s...%n", workerId, job.getId());
-                            // Simulate work (remove in real code)
-                            Thread.sleep(500); // simulate some work
-
-                            syncExecutor.execute(job);
-
-                            System.out.printf("[%s] Successfully processed job %s%n", workerId, job.getId());
-                            // TODO: update job status to COMPLETED via syncJobService
+                            dispatcher.dispatch(job);
+                            boolean completed = syncJobService.complete(job.getId(), workerId);
+                            System.out.printf(
+                                    completed
+                                            ? "[%s] Successfully processed job %s%n"
+                                            : "[%s] Job %s was superseded during processing%n",
+                                    workerId,
+                                    job.getId()
+                            );
                         } catch (Exception e) {
                             System.out.printf("[%s] FAILED processing job %s: %s%n",
                                     workerId, job.getId(), e.getMessage());
-                            // TODO: handle failure (increment attempts, set next retry time)
+                            syncJobService.fail(job.getId(), workerId, e);
                         }
                     }
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
                 } catch (Exception e) {
-                    System.out.println("Worker " + workerId + " is interrupted");
-
+                    System.out.printf("[%s] Worker loop failed: %s%n", workerId, e.getMessage());
                     try {
                         Thread.sleep(1000);
-                    } catch (InterruptedException ignored) {
+                    } catch (InterruptedException interrupted) {
                         Thread.currentThread().interrupt();
                     }
                 }

@@ -17,9 +17,28 @@ spring:
 
 app:
   worker:
+    enabled: true
     count: 2
     claim:
       limit: 1
+  sync:
+    customer:
+      enabled: true
+      poll-delay-ms: 10000
+    conflict-resolution:
+      customer-fields:
+        - key: name
+          netsuite-field: entityId
+          salesforce-field: Name
+        - key: firstName
+          netsuite-field: firstName
+          salesforce-field: First_Name__c
+        - key: lastName
+          netsuite-field: lastName
+          salesforce-field: Last_Name__c
+        - key: email
+          netsuite-field: email
+          salesforce-field: Account_Email__c
 #  autoconfigure:
 #    exclude:
 #      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
@@ -42,5 +61,3 @@ salesforce:
   client-id: ${SF_CLIENT_ID}
   client-secret: ${SF_CLIENT_SECRET}
   grant-type: client_credentials
-
-

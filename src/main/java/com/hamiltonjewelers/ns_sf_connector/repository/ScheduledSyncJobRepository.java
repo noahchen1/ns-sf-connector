@@ -10,10 +10,10 @@ import java.util.UUID;
 public interface ScheduledSyncJobRepository extends JpaRepository<ScheduledSyncJob, UUID> {
     @Query(value = """
         SELECT * FROM scheduled_sync_jobs
-        WHERE source_system = :sourceSystem
-            AND target_system = :targetSystem
-            AND record_type = :recordType
-            AND sync_type = :syncType
+        WHERE UPPER(source_system) = UPPER(:sourceSystem)
+            AND UPPER(target_system) = UPPER(:targetSystem)
+            AND UPPER(record_type) = UPPER(:recordType)
+            AND UPPER(sync_type) = UPPER(:syncType)
         LIMIT 1
     """, nativeQuery = true)
     ScheduledSyncJob getLastScheduledSyncJob(

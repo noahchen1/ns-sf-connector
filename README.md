@@ -13,20 +13,41 @@ The connector currently uses two support tables:
 
 - source and target systems
 - record type and source/target record IDs
-- operation type (`INSERT`, `UPDATE`)
-- queue status and retry info (`PENDING`, attempts, availability, claim metadata)
+- operation type (`INSERT`, `UPDATE`, `RECONCILE`)
+- queue status and retry info (`PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`,
+  `SUPERSEDED`, attempts, availability, and claim metadata)
+
+## Sync Workflow
+
+Customer synchronization is separated into three stages:
+
+1. `service.sync.discovery.customer` scans both systems from the persisted
+   `lastSuccessfulAt` watermark and plans queue jobs.
+2. `service.sync.job` owns typed routing, queue lifecycle, worker dispatch,
+   completion, and retry behavior.
+3. `service.sync.customer` loads linked state and delegates to one operation
+   component per supported direction. Field comparison and conflict handling
+   live under `customer.conflict`.
+
+The scheduled scan uses a configurable fixed delay:
+
+```yaml
+app.sync.customer.poll-delay-ms: 10000
+```
 
 ## Sync Direction and Precedence
 
 - The connector is **bi-directional**.
-- If both systems modify the same mapped record, **NetSuite wins**.
+- The most recently modified record wins.
+- NetSuite wins when the timestamps are equal.
 
 ### Current creation behavior
 
 - NS-only record -> create in Salesforce
-- SF-only record -> create in NetSuite
+- linked records -> update the older system
+- SF-only record -> ignored until NetSuite customer creation is supported
 
-> Delete behavior is intentionally deferred for now.
+Delete behavior and Salesforce-to-NetSuite creation are intentionally deferred.
 
 ## Date/Time Handling
 

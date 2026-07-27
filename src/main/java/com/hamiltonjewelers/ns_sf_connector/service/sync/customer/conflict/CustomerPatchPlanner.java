@@ -1,11 +1,13 @@
-package com.hamiltonjewelers.ns_sf_connector.service.sync.customer;
+package com.hamiltonjewelers.ns_sf_connector.service.sync.customer.conflict;
 
 import com.hamiltonjewelers.ns_sf_connector.config.ConflictResolutionConfig;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.customer.CustomerMapping;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -14,15 +16,21 @@ public class CustomerPatchPlanner {
     private final ConflictResolutionConfig conflictResolutionConfig;
     private final CustomerMapping mapping;
 
-    public CustomerPatchPlanner(ConflictResolutionConfig conflictResolutionConfig, CustomerMapping mapping) {
+    public CustomerPatchPlanner(
+            ConflictResolutionConfig conflictResolutionConfig,
+            CustomerMapping mapping
+    ) {
         this.conflictResolutionConfig = conflictResolutionConfig;
         this.mapping = mapping;
     }
 
-    public CustomerPatches plan(CustomerDto netsuite, AccountDto.AccountRecord salesforce, boolean netsuiteWins) {
+    public CustomerPatches plan(
+            CustomerDto netsuite,
+            AccountDto.AccountRecord salesforce,
+            boolean netsuiteWins
+    ) {
         Map<String, Object> salesforcePatch = new HashMap<>();
         Map<String, Object> netsuitePatch = new HashMap<>();
-
         for (ConflictResolutionConfig.CustomerField field : conflictResolutionConfig.getCustomerFields()) {
             String netsuiteValue = mapping.netsuiteValue(field.getKey(), netsuite);
             String salesforceValue = mapping.salesforceValue(field.getKey(), salesforce);
@@ -34,6 +42,9 @@ public class CustomerPatchPlanner {
                 }
             }
         }
-        return new CustomerPatches(salesforcePatch, netsuitePatch);
+        return new CustomerPatches(
+                Collections.unmodifiableMap(salesforcePatch),
+                Collections.unmodifiableMap(netsuitePatch)
+        );
     }
 }
