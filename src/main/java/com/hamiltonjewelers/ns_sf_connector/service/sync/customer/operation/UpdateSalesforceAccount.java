@@ -8,9 +8,9 @@ import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.customer.CustomerSyncContext;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.customer.conflict.CustomerPatchPlanner;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.customer.conflict.CustomerPatches;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncOperation;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncOperation;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncRoute;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncSystem;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncSystem;
 import org.springframework.stereotype.Component;
 
 @Component

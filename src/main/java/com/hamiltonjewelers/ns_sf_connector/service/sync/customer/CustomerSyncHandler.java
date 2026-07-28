@@ -4,7 +4,7 @@ import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.customer.operation.CustomerSyncOperation;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncHandler;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncJobService;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncRecordType;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncRecordType;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncRoute;
 import org.springframework.stereotype.Component;
 

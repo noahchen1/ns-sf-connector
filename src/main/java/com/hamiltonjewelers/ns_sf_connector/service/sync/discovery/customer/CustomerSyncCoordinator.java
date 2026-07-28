@@ -4,8 +4,8 @@ import com.hamiltonjewelers.ns_sf_connector.model.ScheduledSyncJob;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.repository.ScheduledSyncJobRepository;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncJobService;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncRecordType;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncSystem;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncRecordType;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncSystem;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,6 +36,7 @@ public class CustomerSyncCoordinator {
     public List<SyncJob> discoverAndEnqueue() {
         LocalDateTime scanStartedAt = LocalDateTime.now();
         ScheduledSyncJob schedule = findOrCreateSchedule(scanStartedAt);
+
         LocalDateTime since = schedule.getLastSuccessfulAt();
 
         List<CustomerChange> changes = changeScanner.scan(since);
@@ -54,6 +55,7 @@ public class CustomerSyncCoordinator {
                 SyncRecordType.CUSTOMER.name(),
                 SYNC_TYPE
         );
+
         if (existing != null) {
             return existing;
         }
@@ -66,6 +68,7 @@ public class CustomerSyncCoordinator {
         schedule.setSyncType(SYNC_TYPE);
         schedule.setLastSuccessfulAt(now.minusHours(1));
         schedule.setUpdatedAt(now);
+
         return schedule;
     }
 }

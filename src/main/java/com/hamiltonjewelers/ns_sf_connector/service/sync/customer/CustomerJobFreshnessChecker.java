@@ -1,8 +1,8 @@
 package com.hamiltonjewelers.ns_sf_connector.service.sync.customer;
 
 import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncRoute;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncOperation;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncSystem;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncOperation;
+import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncSystem;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;

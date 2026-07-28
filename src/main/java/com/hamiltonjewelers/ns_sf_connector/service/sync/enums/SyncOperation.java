@@ -1,4 +1,4 @@
-package com.hamiltonjewelers.ns_sf_connector.service.sync.job;
+package com.hamiltonjewelers.ns_sf_connector.service.sync.enums;
 
 public enum SyncOperation {
     INSERT,
