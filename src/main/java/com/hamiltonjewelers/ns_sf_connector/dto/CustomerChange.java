@@ -1,4 +1,4 @@
-package com.hamiltonjewelers.ns_sf_connector.service.sync.discovery.customer;
+package com.hamiltonjewelers.ns_sf_connector.dto;
 
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;

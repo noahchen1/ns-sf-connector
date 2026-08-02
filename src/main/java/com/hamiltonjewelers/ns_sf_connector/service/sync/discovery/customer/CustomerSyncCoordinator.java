@@ -4,8 +4,9 @@ import com.hamiltonjewelers.ns_sf_connector.model.ScheduledSyncJob;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.repository.ScheduledSyncJobRepository;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncJobService;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncRecordType;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncSystem;
+import com.hamiltonjewelers.ns_sf_connector.dto.CustomerChange;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncRecordType;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncSystem;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

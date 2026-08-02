@@ -1,5 +1,6 @@
 package com.hamiltonjewelers.ns_sf_connector.service.sync.customer.conflict;
 
+import com.hamiltonjewelers.ns_sf_connector.dto.CustomerPatches;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import org.springframework.stereotype.Component;

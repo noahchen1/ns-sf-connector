@@ -1,9 +1,9 @@
-package com.hamiltonjewelers.ns_sf_connector.service.sync.job;
+package com.hamiltonjewelers.ns_sf_connector.dto;
 
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncOperation;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncRecordType;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncSystem;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncOperation;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncRecordType;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncSystem;
 
 public record SyncRoute(
         SyncSystem sourceSystem,

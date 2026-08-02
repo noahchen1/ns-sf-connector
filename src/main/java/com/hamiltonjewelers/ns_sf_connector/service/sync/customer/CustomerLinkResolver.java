@@ -1,8 +1,8 @@
 package com.hamiltonjewelers.ns_sf_connector.service.sync.customer;
 
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncRoute;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncSystem;
+import com.hamiltonjewelers.ns_sf_connector.dto.SyncRoute;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncSystem;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,4 +1,4 @@
-package com.hamiltonjewelers.ns_sf_connector.service.sync.enums;
+package com.hamiltonjewelers.ns_sf_connector.enums;
 
 public enum SyncStatus {
     PENDING,

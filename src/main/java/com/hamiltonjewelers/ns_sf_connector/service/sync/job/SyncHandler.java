@@ -1,7 +1,8 @@
 package com.hamiltonjewelers.ns_sf_connector.service.sync.job;
 
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncRecordType;
+import com.hamiltonjewelers.ns_sf_connector.dto.SyncRoute;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncRecordType;
 
 public interface SyncHandler {
     boolean supports(SyncRecordType recordType);

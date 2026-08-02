@@ -1,5 +1,6 @@
 package com.hamiltonjewelers.ns_sf_connector.service.sync.customer;
 
+import com.hamiltonjewelers.ns_sf_connector.dto.CustomerState;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.auth.NsAuthClient;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.customer.NsCustomerClient;
 import com.hamiltonjewelers.ns_sf_connector.client.sf.account.SfAccountClient;

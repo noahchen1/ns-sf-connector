@@ -1,4 +1,4 @@
-package com.hamiltonjewelers.ns_sf_connector.service.sync.customer.conflict;
+package com.hamiltonjewelers.ns_sf_connector.dto;
 
 import java.util.Map;
 

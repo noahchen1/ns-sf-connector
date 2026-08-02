@@ -3,10 +3,11 @@ package com.hamiltonjewelers.ns_sf_connector.service.sync.discovery.customer;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncOperation;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncRecordType;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncStatus;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncSystem;
+import com.hamiltonjewelers.ns_sf_connector.dto.CustomerChange;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncOperation;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncRecordType;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncStatus;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncSystem;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;

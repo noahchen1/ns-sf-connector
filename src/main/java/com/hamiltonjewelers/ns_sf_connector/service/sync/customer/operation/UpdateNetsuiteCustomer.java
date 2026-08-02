@@ -5,12 +5,12 @@ import com.hamiltonjewelers.ns_sf_connector.client.ns.customer.NsCustomerClient;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.customer.CustomerSyncContext;
+import com.hamiltonjewelers.ns_sf_connector.dto.CustomerPatches;
+import com.hamiltonjewelers.ns_sf_connector.dto.CustomerSyncContext;
+import com.hamiltonjewelers.ns_sf_connector.dto.SyncRoute;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncOperation;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncSystem;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.customer.conflict.CustomerPatchPlanner;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.customer.conflict.CustomerPatches;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncOperation;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncRoute;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncSystem;
 import org.springframework.stereotype.Component;
 
 @Component

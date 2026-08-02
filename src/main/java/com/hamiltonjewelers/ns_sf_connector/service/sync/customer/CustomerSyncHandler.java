@@ -4,8 +4,10 @@ import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.customer.operation.CustomerSyncOperation;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncHandler;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncJobService;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.enums.SyncRecordType;
-import com.hamiltonjewelers.ns_sf_connector.service.sync.job.SyncRoute;
+import com.hamiltonjewelers.ns_sf_connector.dto.CustomerState;
+import com.hamiltonjewelers.ns_sf_connector.dto.CustomerSyncContext;
+import com.hamiltonjewelers.ns_sf_connector.dto.SyncRoute;
+import com.hamiltonjewelers.ns_sf_connector.enums.SyncRecordType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
