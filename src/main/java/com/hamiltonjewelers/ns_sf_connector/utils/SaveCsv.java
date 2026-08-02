@@ -15,11 +15,11 @@ public class SaveCsv {
             writer.append("Name,Item__c,Location_Id__c,Quantity_On_Hand__c").append("\n");
 
             for (NsInvLocationResponseDto.InvLocation invLocation : invLocations) {
-                String name = invLocation.getLocation() + "_" + invLocation.getItem();
+                String name = invLocation.location() + "_" + invLocation.item();
                 writer.append(name).append(",");
-                writer.append(String.valueOf(invLocation.getItem())).append(",");
-                writer.append(String.valueOf(invLocation.getLocation())).append(",");
-                writer.append(String.valueOf(invLocation.getQuantityOnHand())).append("\n");
+                writer.append(String.valueOf(invLocation.item())).append(",");
+                writer.append(String.valueOf(invLocation.location())).append(",");
+                writer.append(String.valueOf(invLocation.quantityOnHand())).append("\n");
             }
             System.out.println("CSV file 'inv_locations.csv' has been saved successfully.");
         } catch (IOException e) {

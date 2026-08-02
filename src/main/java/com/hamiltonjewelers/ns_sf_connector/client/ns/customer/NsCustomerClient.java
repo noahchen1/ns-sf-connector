@@ -2,7 +2,7 @@ package com.hamiltonjewelers.ns_sf_connector.client.ns.customer;
 
 import tools.jackson.databind.ObjectMapper;
 import com.hamiltonjewelers.ns_sf_connector.config.NsConfig;
-import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
+import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerResDto;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
@@ -33,7 +33,7 @@ public class NsCustomerClient {
         this.webClient = webClientBuilder.baseUrl(config.getBaseUrl()).build();
     }
 
-    public List<CustomerItemDto> getCustomers(String accessToken, LocalDateTime since) {
+    public List<CustomerDto> getCustomers(String accessToken, LocalDateTime since) {
         final String formattedDate = since.format(DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss"));
         final String queryStr = """
                     SELECT TOP(5)
@@ -63,7 +63,7 @@ public class NsCustomerClient {
         return executeQuery(queryStr, accessToken);
     }
 
-    public List<CustomerItemDto> getCustomer(String accessToken, String internalId) {
+    public List<CustomerDto> getCustomer(String accessToken, String internalId) {
         final String queryStr = """
                     SELECT
                     customer.id AS internalId,
@@ -94,7 +94,7 @@ public class NsCustomerClient {
                 .block();
     }
 
-    public List<CustomerItemDto> getCustomersByInternalIds(String accessToken, Set<Integer> internalIds) {
+    public List<CustomerDto> getCustomersByInternalIds(String accessToken, Set<Integer> internalIds) {
         if (internalIds == null || internalIds.isEmpty()) {
             return Collections.emptyList();
         }
@@ -128,7 +128,7 @@ public class NsCustomerClient {
         return executeQuery(queryStr, accessToken);
     }
 
-    private List<CustomerItemDto> executeQuery(String queryStr, String accessToken) {
+    private List<CustomerDto> executeQuery(String queryStr, String accessToken) {
         final String formmatedQuery = String.format("{\"q\": \"%s\"}", queryStr.replaceAll("\\s+", " ").trim());
 
         CustomerResDto res = webClient
@@ -157,6 +157,6 @@ public class NsCustomerClient {
             throw new RuntimeException("Failed to fetch ns customers: empty response");
         }
 
-        return res.getItems() != null ? res.getItems() : Collections.emptyList();
+        return res.items() != null ? res.items() : Collections.emptyList();
     }
 }

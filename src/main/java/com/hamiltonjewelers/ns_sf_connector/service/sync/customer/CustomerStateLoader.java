@@ -5,7 +5,7 @@ import com.hamiltonjewelers.ns_sf_connector.client.ns.auth.NsAuthClient;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.customer.NsCustomerClient;
 import com.hamiltonjewelers.ns_sf_connector.client.sf.account.SfAccountClient;
 import com.hamiltonjewelers.ns_sf_connector.client.sf.auth.SfAuthClient;
-import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
+import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +32,7 @@ public class CustomerStateLoader {
     }
 
     public CustomerState load(int netsuiteId) {
-        List<CustomerItemDto> netsuiteRows = nsCustomerClient.getCustomer(
+        List<CustomerDto> netsuiteRows = nsCustomerClient.getCustomer(
                 nsAuthClient.fetchAccessToken(),
                 String.valueOf(netsuiteId)
         );

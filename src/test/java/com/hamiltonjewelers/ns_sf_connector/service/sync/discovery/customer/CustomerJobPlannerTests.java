@@ -1,6 +1,6 @@
 package com.hamiltonjewelers.ns_sf_connector.service.sync.discovery.customer;
 
-import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
+import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.dto.CustomerChange;
@@ -37,7 +37,7 @@ class CustomerJobPlannerTests {
 
     @Test
     void updatesTheOlderSystem() {
-        CustomerItemDto netsuite = netsuiteCustomer(42, now.minusMinutes(5));
+        CustomerDto netsuite = netsuiteCustomer(42, now.minusMinutes(5));
         AccountDto.AccountRecord salesforce = salesforceAccount(42, now);
 
         List<SyncJob> jobs = planner.plan(
@@ -62,18 +62,15 @@ class CustomerJobPlannerTests {
         assertThat(jobs).isEmpty();
     }
 
-    private CustomerItemDto netsuiteCustomer(int id, LocalDateTime modifiedAt) {
-        CustomerItemDto customer = new CustomerItemDto();
-        customer.setInternalId(id);
-        customer.setLastModifiedDate(modifiedAt);
-        return customer;
+    private CustomerDto netsuiteCustomer(int id, LocalDateTime modifiedAt) {
+        return new CustomerDto(
+                id, null, modifiedAt, null, null, null, null, null, 0, 0, List.of()
+        );
     }
 
     private AccountDto.AccountRecord salesforceAccount(int netsuiteId, LocalDateTime modifiedAt) {
-        AccountDto.AccountRecord account = new AccountDto.AccountRecord();
-        account.setId("001-test");
-        account.setNetsuiteId(netsuiteId);
-        account.setLastModifiedDate(modifiedAt);
-        return account;
+        return new AccountDto.AccountRecord(
+                null, "001-test", null, netsuiteId, null, null, null, modifiedAt
+        );
     }
 }

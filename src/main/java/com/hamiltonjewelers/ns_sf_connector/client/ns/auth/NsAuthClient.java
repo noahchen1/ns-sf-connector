@@ -54,7 +54,7 @@ public class NsAuthClient {
             throw new RuntimeException("Failed to fetch access token from ns: empty response");
         }
 
-        return res.getAccess_token();
+        return res.accessToken();
     }
 
     public MultiValueMap<String, String> buildNsAuthForm() {

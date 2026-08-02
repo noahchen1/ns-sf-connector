@@ -5,7 +5,7 @@ import com.hamiltonjewelers.ns_sf_connector.client.ns.auth.NsAuthClient;
 import com.hamiltonjewelers.ns_sf_connector.client.ns.customer.NsCustomerClient;
 import com.hamiltonjewelers.ns_sf_connector.client.sf.account.SfAccountClient;
 import com.hamiltonjewelers.ns_sf_connector.client.sf.auth.SfAuthClient;
-import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
+import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import org.springframework.stereotype.Component;
 
@@ -40,13 +40,13 @@ public class CustomerChangeScanner {
         String netsuiteToken = nsAuthClient.fetchAccessToken();
         String salesforceToken = sfAuthClient.fetchAccessToken();
 
-        Map<Integer, CustomerItemDto> changedNetsuite = byNetsuiteId(
+        Map<Integer, CustomerDto> changedNetsuite = byNetsuiteId(
                 nsCustomerClient.getCustomers(netsuiteToken, since),
-                CustomerItemDto::getInternalId
+                CustomerDto::internalId
         );
         Map<Integer, AccountDto.AccountRecord> linkedSalesforce = byNetsuiteId(
                 sfAccountClient.getAccountsByNetsuiteIds(salesforceToken, changedNetsuite.keySet()),
-                AccountDto.AccountRecord::getNetsuiteId
+                AccountDto.AccountRecord::netsuiteId
         );
 
         Map<Integer, CustomerChange> changes = new LinkedHashMap<>();
@@ -57,11 +57,11 @@ public class CustomerChangeScanner {
 
         Map<Integer, AccountDto.AccountRecord> changedSalesforce = byNetsuiteId(
                 sfAccountClient.getAccounts(salesforceToken, since),
-                AccountDto.AccountRecord::getNetsuiteId
+                AccountDto.AccountRecord::netsuiteId
         );
-        Map<Integer, CustomerItemDto> linkedNetsuite = byNetsuiteId(
+        Map<Integer, CustomerDto> linkedNetsuite = byNetsuiteId(
                 nsCustomerClient.getCustomersByInternalIds(netsuiteToken, changedSalesforce.keySet()),
-                CustomerItemDto::getInternalId
+                CustomerDto::internalId
         );
 
         changedSalesforce.forEach((netsuiteId, account) -> changes.put(

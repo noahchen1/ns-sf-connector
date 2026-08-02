@@ -45,7 +45,7 @@ public class CustomerSyncHandler implements SyncHandler {
         CustomerState state = stateLoader.load(netsuiteId);
         if (freshnessChecker.isStale(state, route)) {
             String salesforceId =
-                    state.salesforceAccount() == null ? null : state.salesforceAccount().getId();
+                    state.salesforceAccount() == null ? null : state.salesforceAccount().id();
             syncJobService.supersedeAndEnqueueReconcile(
                     job.getId(),
                     netsuiteId,

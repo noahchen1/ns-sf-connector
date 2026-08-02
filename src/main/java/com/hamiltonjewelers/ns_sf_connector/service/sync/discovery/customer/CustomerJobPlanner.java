@@ -1,6 +1,6 @@
 package com.hamiltonjewelers.ns_sf_connector.service.sync.discovery.customer;
 
-import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerItemDto;
+import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.sf.account.AccountDto;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.dto.CustomerChange;
@@ -25,7 +25,7 @@ public class CustomerJobPlanner {
     }
 
     private SyncJob plan(CustomerChange change, LocalDateTime availableAt) {
-        CustomerItemDto netsuite = change.netsuiteCustomer();
+        CustomerDto netsuite = change.netsuiteCustomer();
         AccountDto.AccountRecord salesforce = change.salesforceAccount();
         if (netsuite == null && salesforce != null) {
             // NetSuite creation is not supported by NsCustomerClient yet.
@@ -44,27 +44,27 @@ public class CustomerJobPlanner {
         if (netsuite == null) {
             return null;
         }
-        if (netsuite.getLastModifiedDate() == null && salesforce.getLastModifiedDate() == null) {
+        if (netsuite.lastModifiedDate() == null && salesforce.lastModifiedDate() == null) {
             return null;
         }
 
         boolean netsuiteWins = wins(
-                netsuite.getLastModifiedDate(),
-                salesforce.getLastModifiedDate()
+                netsuite.lastModifiedDate(),
+                salesforce.lastModifiedDate()
         );
         return netsuiteWins
                 ? newJob(
                         SyncSystem.NETSUITE,
                         SyncSystem.SALESFORCE,
                         String.valueOf(change.netsuiteId()),
-                        salesforce.getId(),
+                        salesforce.id(),
                         SyncOperation.UPDATE,
                         availableAt
                 )
                 : newJob(
                         SyncSystem.SALESFORCE,
                         SyncSystem.NETSUITE,
-                        salesforce.getId(),
+                        salesforce.id(),
                         String.valueOf(change.netsuiteId()),
                         SyncOperation.UPDATE,
                         availableAt

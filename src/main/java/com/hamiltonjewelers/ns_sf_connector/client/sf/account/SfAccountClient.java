@@ -147,6 +147,6 @@ public class SfAccountClient {
             throw new RuntimeException("Failed to fetch accounts: empty response");
         }
 
-        return res.getRecords() != null ? res.getRecords() : Collections.emptyList();
+        return res.records() != null ? res.records() : Collections.emptyList();
     }
 }

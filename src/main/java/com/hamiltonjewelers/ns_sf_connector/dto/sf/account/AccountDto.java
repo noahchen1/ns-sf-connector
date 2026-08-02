@@ -6,133 +6,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class AccountDto {
-    private int totalSize;
-    private boolean done;
-    List<AccountRecord> records;
-
-    public int getTotalSize() {
-        return totalSize;
+public record AccountDto(
+        int totalSize,
+        boolean done,
+        List<AccountRecord> records
+) {
+    public record AccountRecord(
+            Attributes attributes,
+            @JsonProperty("Id") String id,
+            @JsonProperty("Name") String name,
+            @JsonProperty("Netsuite_Id__c") Integer netsuiteId,
+            @JsonProperty("First_Name__c") String firstName,
+            @JsonProperty("Last_Name__c") String lastName,
+            @JsonProperty("Account_Email__c") String email,
+            @JsonProperty("LastModifiedDate")
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+            LocalDateTime lastModifiedDate
+    ) {
     }
 
-    public void setTotalSize(int totalSize) {
-        this.totalSize = totalSize;
-    }
-
-    public boolean isDone() {
-        return done;
-    }
-
-    public void setDone(boolean done) {
-        this.done = done;
-    }
-
-    public List<AccountRecord> getRecords() {
-        return records;
-    }
-
-    public void setRecords(List<AccountRecord> records) {
-        this.records = records;
-    }
-
-    public static class AccountRecord {
-        private Attributes attributes;
-
-        @JsonProperty("Id")
-        private String Id;
-
-        @JsonProperty("Name")
-        private String name;
-
-        @JsonProperty("Netsuite_Id__c")
-        private Integer netsuiteId;
-
-        @JsonProperty("First_Name__c")
-        private String firstName;
-
-        @JsonProperty("Last_Name__c")
-        private String lastName;
-
-        @JsonProperty("Account_Email__c")
-        private String email;
-
-        @JsonProperty("LastModifiedDate")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-        private LocalDateTime lastModifiedDate;
-
-        public Attributes getAttributes() {
-            return attributes;
-        }
-
-        public void setAttributes(Attributes attributes) {
-            this.attributes = attributes;
-        }
-
-        public String getId() {
-            return Id;
-        }
-
-        public void setId(String Id) {
-            this.Id = Id;
-        }
-
-        public String getName() { return name; }
-
-        public void setName(String name) { this.name = name; }
-
-        public Integer getNetsuiteId() { return netsuiteId; }
-
-        public void setNetsuiteId(Integer netsuiteId) { this.netsuiteId = netsuiteId; }
-
-        public String getFirstName() { return firstName; }
-
-        public void setFirstName(String firstName) { this.firstName = firstName; }
-
-        public String getLastName() { return lastName; }
-
-        public void setLastName(String lastName) { this.lastName = lastName; }
-
-        public String getEmail() { return email; }
-
-        public void setEmail(String email) { this.email = email; }
-
-        public LocalDateTime getLastModifiedDate() { return lastModifiedDate; }
-
-        public void setLastModifiedDate(LocalDateTime lastModifiedDate) { this.lastModifiedDate = lastModifiedDate; }
-
-        @Override
-        public String toString() {
-            return String.format("AccountRecord {Id='%s', First_Name='%s', Last_Name='%s', Email='%s', attributes=%s",
-                    Id,
-                    firstName,
-                    lastName,
-                    email,
-                    attributes
-            );
-        }
-    }
-
-    public static class Attributes {
-        private String type;
-        private String url;
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
+    public record Attributes(String type, String url) {
     }
 }
-
-
-

@@ -22,7 +22,7 @@ public class CustomerConflictResolver {
         return patchPlanner.plan(
                 netsuite,
                 salesforce,
-                netsuiteWins(netsuite.getLastModifiedDate(), salesforce.getLastModifiedDate())
+                netsuiteWins(netsuite.lastModifiedDate(), salesforce.lastModifiedDate())
         );
     }
 

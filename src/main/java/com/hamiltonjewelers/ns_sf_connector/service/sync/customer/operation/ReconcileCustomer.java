@@ -52,7 +52,7 @@ public class ReconcileCustomer implements CustomerSyncOperation {
         if (!patches.salesforcePatch().isEmpty()) {
             sfAccountClient.updateAccount(
                     sfAuthClient.fetchAccessToken(),
-                    account.getId(),
+                    account.id(),
                     patches.salesforcePatch()
             );
         }

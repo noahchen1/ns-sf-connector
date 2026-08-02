@@ -84,7 +84,7 @@ public class NsInvLocationClient {
                 throw new RuntimeException(e);
             }
 
-            List<NsInvLocationResponseDto.InvLocation> results = res.getInvLocations();
+            List<NsInvLocationResponseDto.InvLocation> results = res.invLocations();
             if (!results.isEmpty()) {
                 allResults.addAll(results);
                 startRow += pageSize;

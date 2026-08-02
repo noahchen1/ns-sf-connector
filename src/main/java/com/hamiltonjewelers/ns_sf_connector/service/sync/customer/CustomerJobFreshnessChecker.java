@@ -28,10 +28,10 @@ public class CustomerJobFreshnessChecker {
         return switch (system) {
             case NETSUITE -> state.netsuiteCustomer() == null
                     ? null
-                    : state.netsuiteCustomer().getLastModifiedDate();
+                    : state.netsuiteCustomer().lastModifiedDate();
             case SALESFORCE -> state.salesforceAccount() == null
                     ? null
-                    : state.salesforceAccount().getLastModifiedDate();
+                    : state.salesforceAccount().lastModifiedDate();
             case SYSTEM -> null;
         };
     }
