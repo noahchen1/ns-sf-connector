@@ -17,8 +17,7 @@ public record CustomerDto(
         String lastname,
         String address,
         String sfid,
-        int subsidiary,
-        @JsonProperty("id") int rowId,
+        Integer subsidiary,
         List<LinkDto> links
 ) {
 }

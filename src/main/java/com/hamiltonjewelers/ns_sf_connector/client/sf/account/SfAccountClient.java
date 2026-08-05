@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -28,8 +29,8 @@ public class SfAccountClient {
     }
 
     public List<AccountDto.AccountRecord> getAccounts(String accessToken, LocalDateTime since) {
-        final String formattedDate = since
-                .atOffset(ZoneOffset.UTC)
+        final String formattedDate = since.atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneOffset.UTC)
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
 
         final String queryStr = """
@@ -72,6 +73,32 @@ public class SfAccountClient {
         """.formatted(idList);
 
         return executeQuery(queryStr, accessToken);
+    }
+
+    public AccountDto.AccountRecord getAccountById(String accessToken, String accountId) {
+        if (accountId == null || !accountId.matches("[a-zA-Z0-9]{15,18}")) {
+            throw new IllegalArgumentException("Invalid Salesforce Account ID: " + accountId);
+        }
+
+        final String queryStr = """
+            SELECT
+            Id,
+            Name,
+            Netsuite_Id__c,
+            First_Name__c,
+            Last_Name__c,
+            Account_Email__c,
+            LastModifiedDate
+            FROM Account
+            WHERE Id = '%s'
+            LIMIT 1
+        """.formatted(accountId);
+
+        List<AccountDto.AccountRecord> accounts = executeQuery(queryStr, accessToken);
+        if (accounts.isEmpty()) {
+            throw new IllegalStateException("Salesforce Account not found: " + accountId);
+        }
+        return accounts.getFirst();
     }
 
     public String createAccount(String accessToken, Map<String, Object> accountFields) {

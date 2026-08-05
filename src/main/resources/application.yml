@@ -46,6 +46,7 @@ app:
 
 netsuite:
   base_url: ${NS_BASE_URI}
+  default-customer-subsidiary-id: ${NS_DEFAULT_CUSTOMER_SUBSIDIARY_ID:30}
   auth-url: ${NS_TOKEN_URI}
   client-id: ${NS_CLIENT_ID}
   cert-id: ${NS_CERT_ID}

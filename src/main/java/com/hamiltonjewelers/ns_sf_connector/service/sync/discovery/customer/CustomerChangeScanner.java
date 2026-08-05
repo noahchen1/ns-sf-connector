@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,11 +53,20 @@ public class CustomerChangeScanner {
         Map<Integer, CustomerChange> changes = new LinkedHashMap<>();
         changedNetsuite.forEach((netsuiteId, customer) -> changes.put(
                 netsuiteId,
-                new CustomerChange(netsuiteId, customer, linkedSalesforce.get(netsuiteId))
+                new CustomerChange(
+                        netsuiteId,
+                        linkedSalesforce.containsKey(netsuiteId)
+                                ? linkedSalesforce.get(netsuiteId).id()
+                                : null,
+                        customer,
+                        linkedSalesforce.get(netsuiteId)
+                )
         ));
 
+        List<AccountDto.AccountRecord> changedSalesforceRows =
+                sfAccountClient.getAccounts(salesforceToken, since);
         Map<Integer, AccountDto.AccountRecord> changedSalesforce = byNetsuiteId(
-                sfAccountClient.getAccounts(salesforceToken, since),
+                changedSalesforceRows,
                 AccountDto.AccountRecord::netsuiteId
         );
         Map<Integer, CustomerDto> linkedNetsuite = byNetsuiteId(
@@ -68,6 +78,7 @@ public class CustomerChangeScanner {
                 netsuiteId,
                 new CustomerChange(
                         netsuiteId,
+                        account.id(),
                         linkedNetsuite.getOrDefault(
                                 netsuiteId,
                                 changes.containsKey(netsuiteId) ? changes.get(netsuiteId).netsuiteCustomer() : null
@@ -75,7 +86,13 @@ public class CustomerChangeScanner {
                         account
                 )
         ));
-        return List.copyOf(changes.values());
+
+        List<CustomerChange> discovered = new ArrayList<>(changes.values());
+        changedSalesforceRows.stream()
+                .filter(account -> account.netsuiteId() == null)
+                .map(account -> new CustomerChange(null, account.id(), null, account))
+                .forEach(discovered::add);
+        return List.copyOf(discovered);
     }
 
     private <T> Map<Integer, T> byNetsuiteId(List<T> records, Function<T, Integer> idExtractor) {

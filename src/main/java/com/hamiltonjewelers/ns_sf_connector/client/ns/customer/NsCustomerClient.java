@@ -5,6 +5,7 @@ import com.hamiltonjewelers.ns_sf_connector.config.NsConfig;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerDto;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.customer.CustomerResDto;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -94,6 +95,50 @@ public class NsCustomerClient {
                 .block();
     }
 
+    public int createCustomer(String accessToken, Map<String, Object> customerFields) {
+        ResponseEntity<Void> response = webClient.post()
+                .uri("/record/v1/customer")
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .bodyValue(customerFields)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, clientResponse ->
+                        clientResponse.bodyToMono(String.class)
+                                .flatMap(body -> Mono.error(new RuntimeException(
+                                        "NetSuite Customer creation failed: "
+                                                + clientResponse.statusCode() + " - " + body))))
+                .toBodilessEntity()
+                .block();
+
+        if (response == null || response.getHeaders().getLocation() == null) {
+            throw new IllegalStateException(
+                    "NetSuite Customer creation response did not include a Location header"
+            );
+        }
+        return internalIdFrom(response.getHeaders().getLocation());
+    }
+
+    public List<CustomerDto> getCustomersBySalesforceId(
+            String accessToken,
+            String salesforceId
+    ) {
+        requireSalesforceId(salesforceId);
+        final String queryStr = """
+                SELECT
+                customer.id AS internalId,
+                customer.entityId AS custId,
+                customer.lastName AS lastname,
+                customer.firstName AS firstname,
+                customer.custentity_sfid AS sfid,
+                customer.email AS email,
+                TO_CHAR(customer.lastmodifieddate, 'YYYY-MM-DD HH24:MI:SS') AS lastmodifieddate
+                FROM customer
+                WHERE customer.custentity_sfid = '%s'
+            """.formatted(salesforceId);
+
+        return executeQuery(queryStr, accessToken);
+    }
+
     public List<CustomerDto> getCustomersByInternalIds(String accessToken, Set<Integer> internalIds) {
         if (internalIds == null || internalIds.isEmpty()) {
             return Collections.emptyList();
@@ -158,5 +203,24 @@ public class NsCustomerClient {
         }
 
         return res.items() != null ? res.items() : Collections.emptyList();
+    }
+
+    private int internalIdFrom(URI location) {
+        String path = location.getPath();
+        String id = path.substring(path.lastIndexOf('/') + 1);
+        try {
+            return Integer.parseInt(id);
+        } catch (NumberFormatException exception) {
+            throw new IllegalStateException(
+                    "Invalid NetSuite Customer Location header: " + location,
+                    exception
+            );
+        }
+    }
+
+    private void requireSalesforceId(String salesforceId) {
+        if (salesforceId == null || !salesforceId.matches("[a-zA-Z0-9]{15,18}")) {
+            throw new IllegalArgumentException("Invalid Salesforce Account ID: " + salesforceId);
+        }
     }
 }

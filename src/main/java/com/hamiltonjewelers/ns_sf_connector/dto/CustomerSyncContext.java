@@ -1,4 +1,4 @@
 package com.hamiltonjewelers.ns_sf_connector.dto;
 
-public record CustomerSyncContext(int netsuiteCustomerId, CustomerState state) {
+public record CustomerSyncContext(Integer netsuiteCustomerId, CustomerState state) {
 }

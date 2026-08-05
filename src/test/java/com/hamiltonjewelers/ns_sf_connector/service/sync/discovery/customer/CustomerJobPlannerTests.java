@@ -21,7 +21,7 @@ class CustomerJobPlannerTests {
     @Test
     void createsSalesforceAccountForNetsuiteOnlyCustomer() {
         List<SyncJob> jobs = planner.plan(
-                List.of(new CustomerChange(42, netsuiteCustomer(42, now), null)),
+                List.of(new CustomerChange(42, null, netsuiteCustomer(42, now), null)),
                 now
         );
 
@@ -41,7 +41,7 @@ class CustomerJobPlannerTests {
         AccountDto.AccountRecord salesforce = salesforceAccount(42, now);
 
         List<SyncJob> jobs = planner.plan(
-                List.of(new CustomerChange(42, netsuite, salesforce)),
+                List.of(new CustomerChange(42, salesforce.id(), netsuite, salesforce)),
                 now
         );
 
@@ -53,13 +53,23 @@ class CustomerJobPlannerTests {
     }
 
     @Test
-    void ignoresSalesforceOnlyRecordUntilNetsuiteCreationIsSupported() {
+    void createsNetsuiteCustomerForSalesforceOnlyAccount() {
+        AccountDto.AccountRecord salesforce = salesforceAccount(null, now);
+
         List<SyncJob> jobs = planner.plan(
-                List.of(new CustomerChange(42, null, salesforceAccount(42, now))),
+                List.of(new CustomerChange(null, salesforce.id(), null, salesforce)),
                 now
         );
 
-        assertThat(jobs).isEmpty();
+        assertThat(jobs).singleElement().satisfies(job -> {
+            assertThat(SyncRoute.from(job).is(
+                    SyncSystem.SALESFORCE,
+                    SyncSystem.NETSUITE,
+                    SyncOperation.INSERT
+            )).isTrue();
+            assertThat(job.getSourceRecordId()).isEqualTo(salesforce.id());
+            assertThat(job.getTargetRecordId()).isNull();
+        });
     }
 
     private CustomerDto netsuiteCustomer(int id, LocalDateTime modifiedAt) {
@@ -68,7 +78,7 @@ class CustomerJobPlannerTests {
         );
     }
 
-    private AccountDto.AccountRecord salesforceAccount(int netsuiteId, LocalDateTime modifiedAt) {
+    private AccountDto.AccountRecord salesforceAccount(Integer netsuiteId, LocalDateTime modifiedAt) {
         return new AccountDto.AccountRecord(
                 null, "001-test", null, netsuiteId, null, null, null, modifiedAt
         );

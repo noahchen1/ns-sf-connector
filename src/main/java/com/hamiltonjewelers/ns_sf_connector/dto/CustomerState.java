@@ -20,4 +20,11 @@ public record CustomerState(
         }
         return salesforceAccount;
     }
+
+    public AccountDto.AccountRecord requireSalesforceAccount(String salesforceId) {
+        if (salesforceAccount == null) {
+            throw new IllegalStateException("Salesforce Account is missing for ID " + salesforceId);
+        }
+        return salesforceAccount;
+    }
 }

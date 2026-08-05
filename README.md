@@ -44,10 +44,20 @@ app.sync.customer.poll-delay-ms: 10000
 ### Current creation behavior
 
 - NS-only record -> create in Salesforce
+- SF-only record -> create in NetSuite and write the new NetSuite ID back to Salesforce
 - linked records -> update the older system
-- SF-only record -> ignored until NetSuite customer creation is supported
 
-Delete behavior and Salesforce-to-NetSuite creation are intentionally deferred.
+Salesforce-to-NetSuite creation uses the Salesforce Account ID as the NetSuite
+external ID and `custentity_sfid`. This makes retries safe when customer creation
+succeeds but updating the Salesforce link fails.
+
+Set the subsidiary used for newly created NetSuite customers:
+
+```text
+NS_DEFAULT_CUSTOMER_SUBSIDIARY_ID=<NetSuite subsidiary internal ID>
+```
+
+Delete behavior is intentionally deferred.
 
 ## Date/Time Handling
 

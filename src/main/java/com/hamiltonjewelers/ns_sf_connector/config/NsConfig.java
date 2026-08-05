@@ -18,6 +18,7 @@ public class NsConfig {
     private List<String> scope;
     private String clientAssertionType;
     private String baseUrl;
+    private String defaultCustomerSubsidiaryId;
 
     public String getBaseUrl() { return baseUrl; }
 
@@ -61,5 +62,13 @@ public class NsConfig {
 
     public void setClientAssertionType(String clientAssertionType) {
         this.clientAssertionType = clientAssertionType;
+    }
+
+    public String getDefaultCustomerSubsidiaryId() {
+        return defaultCustomerSubsidiaryId;
+    }
+
+    public void setDefaultCustomerSubsidiaryId(String defaultCustomerSubsidiaryId) {
+        this.defaultCustomerSubsidiaryId = defaultCustomerSubsidiaryId;
     }
 }

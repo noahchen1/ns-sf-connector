@@ -28,8 +28,14 @@ public class CustomerJobPlanner {
         CustomerDto netsuite = change.netsuiteCustomer();
         AccountDto.AccountRecord salesforce = change.salesforceAccount();
         if (netsuite == null && salesforce != null) {
-            // NetSuite creation is not supported by NsCustomerClient yet.
-            return null;
+            return newJob(
+                    SyncSystem.SALESFORCE,
+                    SyncSystem.NETSUITE,
+                    String.valueOf(change.salesforceId()),
+                    null,
+                    SyncOperation.INSERT,
+                    availableAt
+            );
         }
         if (netsuite != null && salesforce == null) {
             return newJob(

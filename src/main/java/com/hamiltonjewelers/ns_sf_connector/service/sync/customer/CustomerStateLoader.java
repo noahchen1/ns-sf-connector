@@ -43,6 +43,14 @@ public class CustomerStateLoader {
         return new CustomerState(firstOrNull(netsuiteRows), firstOrNull(salesforceRows));
     }
 
+    public CustomerState loadSalesforceAccount(String salesforceId) {
+        AccountDto.AccountRecord account = sfAccountClient.getAccountById(
+                sfAuthClient.fetchAccessToken(),
+                salesforceId
+        );
+        return new CustomerState(null, account);
+    }
+
     private <T> T firstOrNull(List<T> rows) {
         return rows == null || rows.isEmpty() ? null : rows.getFirst();
     }
