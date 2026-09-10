@@ -43,7 +43,7 @@ public class SfItemClient {
         return executeQuery(queryStr, accessToken);
     }
 
-    public List<SfItemDto.ItemRecord> getItemsByNetsuiteId(String accessToken, Set<Integer> netsuiteIds) {
+    public List<SfItemDto.ItemRecord> getItemsByNetsuiteIds(String accessToken, Set<Integer> netsuiteIds) {
         if (netsuiteIds == null || netsuiteIds.isEmpty()) {
             return List.of();
         }
@@ -65,6 +65,33 @@ public class SfItemClient {
                 """.formatted(idList);
 
         return executeQuery(queryStr, accessToken);
+    }
+
+    public SfItemDto.ItemRecord getItemById(String accessToken, String itemId) {
+        if (itemId == null || itemId.isEmpty()) {
+            throw new IllegalArgumentException("itemId cannot be null or empty");
+        }
+
+        final String queryStr = """
+                    SELECT
+                    Id,
+                    Name,
+                    Netsuite_Id__c,
+                    Display_Name__c,
+                    Vendor_Item_Number__c,
+                    LastModifiedDate
+                    FROM Netsuite_Item__c
+                    WHERE Id = '%s'
+                    LIMIT 1
+                """.formatted(itemId);
+
+        List<SfItemDto.ItemRecord> items = executeQuery(queryStr, accessToken);
+
+        if (items.isEmpty()) {
+            throw new IllegalStateException("Salesforce Item not found: " + itemId);
+        }
+
+        return items.getFirst();
     }
 
     private List<SfItemDto.ItemRecord> executeQuery(String queryStr, String accessToken) {

@@ -1,7 +1,8 @@
 package com.hamiltonjewelers.ns_sf_connector.enums;
 
 public enum SyncRecordType {
-    CUSTOMER;
+    CUSTOMER,
+    ITEM;
 
     public static SyncRecordType from(String value) {
         if (value == null || value.isBlank()) {

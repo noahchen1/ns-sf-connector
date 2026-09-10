@@ -44,7 +44,7 @@ public class ItemChangeScanner {
         );
 
         Map<Integer, SfItemDto.ItemRecord> linkedSalesforce = byNetsuiteId(
-                sfItemClient.getItemsByNetsuiteId(salesforceToken, changedNetsuite.keySet()),
+                sfItemClient.getItemsByNetsuiteIds(salesforceToken, changedNetsuite.keySet()),
                 SfItemDto.ItemRecord::netsuiteId
         );
 

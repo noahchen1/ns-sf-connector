@@ -43,6 +43,22 @@ public class NsItemClient {
         return executeQuery(queryStr, accessToken);
     }
 
+    public List<NsItemDto.ItemRecord> getItem(String accessToken, String internalId) {
+        final String queryStr = """
+                SELECT
+                    item.id AS internalid,
+                    item.itemid AS itemid,
+                    item.displayname AS displayname,
+                    item.vendorname AS vendorname,
+                    item.custitem_sfid AS sfid,
+                    TO_CHAR(item.lastmodifieddate, 'YYYY-MM-DD HH24:MI:SS') AS lastmodifieddate
+                FROM item
+                WHERE item.id = %s
+                """.formatted(internalId);
+
+        return executeQuery(queryStr, accessToken);
+    }
+
     public List<NsItemDto.ItemRecord> getItemsBySalesforceId(String accessToken, String salesforceId) {
         if (salesforceId == null || !salesforceId.matches("[a-zA-Z0-9]{15,18}")) {
             throw new IllegalArgumentException("Invalid Salesforce Account ID: " + salesforceId);
