@@ -60,6 +60,7 @@ public class ItemSyncHandler implements SyncHandler {
 
             syncJobService.supersedeAndEnqueueReconcile(
                     job.getId(),
+                    SyncRecordType.ITEM,
                     netsuiteId,
                     salesforceId,
                     "Target changed since enqueue"
@@ -76,7 +77,7 @@ public class ItemSyncHandler implements SyncHandler {
                 .filter(candidate -> candidate.supports(route))
                 .findFirst()
                 .orElseThrow(() -> new UnsupportedOperationException(
-                        "Unsupported customer sync route: " + route
+                        "Unsupported item sync route: " + route
                 ));
     }
 

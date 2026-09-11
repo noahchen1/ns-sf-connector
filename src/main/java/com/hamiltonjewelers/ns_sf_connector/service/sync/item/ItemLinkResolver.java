@@ -15,17 +15,17 @@ public class ItemLinkResolver {
         } else if (route.targetSystem() == SyncSystem.NETSUITE) {
             candidate = job.getTargetRecordId();
         } else {
-            throw new IllegalArgumentException("Route does not identify a NetSuite customer: " + route);
+            throw new IllegalArgumentException("Route does not identify a NetSuite item: " + route);
         }
 
         if (candidate == null || candidate.isBlank()) {
-            throw new IllegalArgumentException("Cannot resolve NetSuite customer ID for sync job " + job.getId());
+            throw new IllegalArgumentException("Cannot resolve NetSuite item ID for sync job " + job.getId());
         }
 
         try {
             return Integer.parseInt(candidate);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid NetSuite customer ID: " + candidate, e);
+            throw new IllegalArgumentException("Invalid NetSuite item ID: " + candidate, e);
         }
     }
 }

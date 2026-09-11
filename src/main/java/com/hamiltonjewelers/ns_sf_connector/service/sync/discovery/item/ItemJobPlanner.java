@@ -8,12 +8,14 @@ import com.hamiltonjewelers.ns_sf_connector.enums.SyncRecordType;
 import com.hamiltonjewelers.ns_sf_connector.enums.SyncStatus;
 import com.hamiltonjewelers.ns_sf_connector.enums.SyncSystem;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+@Component
 public class ItemJobPlanner {
     public List<SyncJob> plan(List<ItemChange> changes, LocalDateTime availableAt) {
         return changes.stream()
@@ -26,7 +28,7 @@ public class ItemJobPlanner {
         NsItemDto.ItemRecord netsuite = change.netsuiteItem();
         SfItemDto.ItemRecord salesforce = change.salesforceItem();
 
-        if (netsuite == null && salesforce == null) {
+        if (netsuite == null && salesforce != null) {
             return newJob(
                     SyncSystem.SALESFORCE,
                     SyncSystem.NETSUITE,

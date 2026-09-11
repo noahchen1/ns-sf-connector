@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Field mappings used when a Customer and Account need reconciliation.
+ * Field mappings used when linked NetSuite and Salesforce records need reconciliation.
  * The record-level LastModifiedDate decides which side wins because the
  * source APIs do not currently expose field-level modification timestamps.
  */
@@ -15,6 +15,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "app.sync.conflict-resolution")
 public class ConflictResolutionConfig {
     private List<CustomerField> customerFields = new ArrayList<>();
+    private List<ItemField> itemFields = new ArrayList<>();
 
     public List<CustomerField> getCustomerFields() {
         return customerFields;
@@ -24,12 +25,33 @@ public class ConflictResolutionConfig {
         this.customerFields = customerFields == null ? new ArrayList<>() : customerFields;
     }
 
+    public List<ItemField> getItemFields() {
+        return itemFields;
+    }
+
+    public void setItemFields(List<ItemField> itemFields) {
+        this.itemFields = itemFields == null ? new ArrayList<>() : itemFields;
+    }
+
     public static class CustomerField {
         /** Canonical property understood by CustomerMapping: name, firstName, lastName, or email. */
         private String key;
         /** NetSuite Record API field ID to update when Salesforce wins. */
         private String netsuiteField;
         /** Salesforce Account field API name to update when NetSuite wins. */
+        private String salesforceField;
+
+        public String getKey() { return key; }
+        public void setKey(String key) { this.key = key; }
+        public String getNetsuiteField() { return netsuiteField; }
+        public void setNetsuiteField(String netsuiteField) { this.netsuiteField = netsuiteField; }
+        public String getSalesforceField() { return salesforceField; }
+        public void setSalesforceField(String salesforceField) { this.salesforceField = salesforceField; }
+    }
+
+    public static class ItemField {
+        private String key;
+        private String netsuiteField;
         private String salesforceField;
 
         public String getKey() { return key; }

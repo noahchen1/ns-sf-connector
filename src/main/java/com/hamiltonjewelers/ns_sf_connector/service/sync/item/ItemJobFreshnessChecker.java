@@ -4,9 +4,11 @@ import com.hamiltonjewelers.ns_sf_connector.dto.ItemState;
 import com.hamiltonjewelers.ns_sf_connector.dto.SyncRoute;
 import com.hamiltonjewelers.ns_sf_connector.enums.SyncOperation;
 import com.hamiltonjewelers.ns_sf_connector.enums.SyncSystem;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+@Component
 public class ItemJobFreshnessChecker {
     public boolean isStale(ItemState state, SyncRoute route) {
         if (route.sourceSystem() == SyncSystem.SYSTEM) {

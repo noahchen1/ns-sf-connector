@@ -72,7 +72,7 @@ class CreateNetsuiteCustomerTests {
     void reusesCustomerCreatedByAnEarlierAttempt() {
         AccountDto.AccountRecord account = account(null);
         CustomerDto existing = new CustomerDto(
-                42, null, null, null, null, null, null, SALESFORCE_ID, 0, 0, List.of()
+                42, null, null, null, null, null, null, SALESFORCE_ID, 0, List.of()
         );
         when(nsAuthClient.fetchAccessToken()).thenReturn("ns-token");
         when(nsCustomerClient.getCustomersBySalesforceId("ns-token", SALESFORCE_ID))

@@ -7,26 +7,23 @@ import com.hamiltonjewelers.ns_sf_connector.client.sf.item.SfItemClient;
 import com.hamiltonjewelers.ns_sf_connector.dto.ItemSyncContext;
 import com.hamiltonjewelers.ns_sf_connector.dto.SyncRoute;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.item.NsItemDto;
-import com.hamiltonjewelers.ns_sf_connector.dto.sf.item.SfItemDto;
 import com.hamiltonjewelers.ns_sf_connector.enums.SyncOperation;
 import com.hamiltonjewelers.ns_sf_connector.enums.SyncSystem;
 import com.hamiltonjewelers.ns_sf_connector.model.SyncJob;
 import com.hamiltonjewelers.ns_sf_connector.service.sync.item.ItemMapping;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
-public class CreateNetsuiteItem implements ItemSyncOperation {
+public class CreateSalesforceItem implements ItemSyncOperation {
     private final ItemMapping mapping;
     private final NsAuthClient nsAuthClient;
     private final NsItemClient nsItemClient;
     private final SfAuthClient sfAuthClient;
     private final SfItemClient sfItemClient;
 
-    public CreateNetsuiteItem(
+    public CreateSalesforceItem(
             ItemMapping mapping,
             NsAuthClient nsAuthClient,
             NsItemClient nsItemClient,
@@ -42,39 +39,21 @@ public class CreateNetsuiteItem implements ItemSyncOperation {
 
     @Override
     public boolean supports(SyncRoute route) {
-        return route.is(SyncSystem.SALESFORCE, SyncSystem.NETSUITE, SyncOperation.INSERT);
+        return route.is(SyncSystem.NETSUITE, SyncSystem.SALESFORCE, SyncOperation.INSERT);
     }
 
     @Override
     public void execute(SyncJob job, ItemSyncContext context) {
-        String salesforceId = job.getSourceRecordId();
-        SfItemDto.ItemRecord item = context.state().requireSalesforceItem(salesforceId);
-        if (!Objects.equals(salesforceId, item.id())) {
-            throw new IllegalStateException(
-                    "Loaded Salesforce Item " + item.id() + " does not match sync job source " + salesforceId
-            );
-        }
-        if (item.netsuiteId() != null) {
-            return;
-        }
-
-        String netsuiteToken = nsAuthClient.fetchAccessToken();
-        List<NsItemDto.ItemRecord> existing =
-                nsItemClient.getItemsBySalesforceId(netsuiteToken, salesforceId);
-        if (existing.size() > 1) {
-            throw new IllegalStateException(
-                    "Multiple NetSuite Items are linked to Salesforce Item " + salesforceId
-            );
-        }
-
-        int netsuiteId = existing.isEmpty()
-                ? nsItemClient.createItem(netsuiteToken, mapping.netsuiteCreateFields(item))
-                : existing.getFirst().internalId();
-
-        sfItemClient.updateItem(
+        int netsuiteId = context.netsuiteItemId();
+        NsItemDto.ItemRecord item = context.state().requireNetsuiteItem(netsuiteId);
+        String salesforceId = sfItemClient.createItem(
                 sfAuthClient.fetchAccessToken(),
-                salesforceId,
-                Map.of("Netsuite_Id__c", netsuiteId)
+                mapping.salesforceCreateFields(item)
+        );
+        nsItemClient.updateItem(
+                nsAuthClient.fetchAccessToken(),
+                String.valueOf(netsuiteId),
+                Map.of("custitem_sfid", salesforceId)
         );
     }
 }

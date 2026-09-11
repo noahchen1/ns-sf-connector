@@ -4,11 +4,13 @@ import com.hamiltonjewelers.ns_sf_connector.config.NsConfig;
 import com.hamiltonjewelers.ns_sf_connector.dto.netsuite.item.NsItemDto;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.net.URI;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -61,7 +63,7 @@ public class NsItemClient {
 
     public List<NsItemDto.ItemRecord> getItemsBySalesforceId(String accessToken, String salesforceId) {
         if (salesforceId == null || !salesforceId.matches("[a-zA-Z0-9]{15,18}")) {
-            throw new IllegalArgumentException("Invalid Salesforce Account ID: " + salesforceId);
+            throw new IllegalArgumentException("Invalid Salesforce Item ID: " + salesforceId);
         }
 
         final String queryStr = """
@@ -103,6 +105,41 @@ public class NsItemClient {
         return executeQuery(queryStr, accessToken);
     }
 
+    public void updateItem(String accessToken, String internalId, Map<String, Object> itemFields) {
+        webClient.patch()
+                .uri("/record/v1/inventoryItem/{internalId}", internalId)
+                .headers(headers -> headers.setBearerAuth(accessToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(itemFields)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response -> response.bodyToMono(String.class)
+                        .flatMap(body -> Mono.error(new RuntimeException(
+                                "NetSuite Item update failed: " + response.statusCode() + " - " + body))))
+                .toBodilessEntity()
+                .block();
+    }
+
+    public int createItem(String accessToken, Map<String, Object> itemFields) {
+        ResponseEntity<Void> response = webClient.post()
+                .uri("/record/v1/inventoryItem")
+                .headers(headers -> headers.setBearerAuth(accessToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(itemFields)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, clientResponse ->
+                        clientResponse.bodyToMono(String.class)
+                                .flatMap(body -> Mono.error(new RuntimeException(
+                                        "NetSuite Item creation failed: "
+                                                + clientResponse.statusCode() + " - " + body))))
+                .toBodilessEntity()
+                .block();
+
+        if (response == null || response.getHeaders().getLocation() == null) {
+            throw new IllegalStateException("NetSuite Item creation response did not include a Location header");
+        }
+        return internalIdFrom(response.getHeaders().getLocation());
+    }
+
     private List<NsItemDto.ItemRecord> executeQuery(String queryStr, String accessToken) {
         Map<String, String> requestBody = Map.of(
                 "q",
@@ -137,5 +174,15 @@ public class NsItemClient {
         }
 
         return res.items() != null ? res.items() : Collections.emptyList();
+    }
+
+    private int internalIdFrom(URI location) {
+        String path = location.getPath();
+        String id = path.substring(path.lastIndexOf('/') + 1);
+        try {
+            return Integer.parseInt(id);
+        } catch (NumberFormatException exception) {
+            throw new IllegalStateException("Invalid NetSuite Item Location header: " + location, exception);
+        }
     }
 }

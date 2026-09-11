@@ -105,17 +105,35 @@ public class SyncJobService {
             String salesforceAccountId,
             String reason
     ) {
+        return supersedeAndEnqueueReconcile(
+                jobId,
+                SyncRecordType.CUSTOMER,
+                netsuiteCustomerId,
+                salesforceAccountId,
+                reason
+        );
+    }
+
+    @Transactional
+    public SyncJob supersedeAndEnqueueReconcile(
+            UUID jobId,
+            SyncRecordType recordType,
+            int netsuiteRecordId,
+            String salesforceRecordId,
+            String reason
+    ) {
         Objects.requireNonNull(jobId, "jobId must not be null");
+        Objects.requireNonNull(recordType, "recordType must not be null");
         Objects.requireNonNull(reason, "reason must not be null");
         if (syncJobRepository.markSuperseded(jobId, reason) != 1) {
             throw new IllegalStateException("Only a PROCESSING job can be superseded: " + jobId);
         }
 
-        String netsuiteId = String.valueOf(netsuiteCustomerId);
+        String netsuiteId = String.valueOf(netsuiteRecordId);
         Optional<SyncJob> active = syncJobRepository
                 .findFirstBySourceSystemAndRecordTypeAndSourceRecordIdAndOperationAndStatusIn(
                         SyncSystem.SYSTEM.name(),
-                        SyncRecordType.CUSTOMER.name(),
+                        recordType.name(),
                         netsuiteId,
                         SyncOperation.RECONCILE.name(),
                         ACTIVE_STATUSES
@@ -127,9 +145,9 @@ public class SyncJobService {
         SyncJob reconcile = newJob(
                 SyncSystem.SYSTEM,
                 SyncSystem.SYSTEM,
-                SyncRecordType.CUSTOMER,
+                recordType,
                 netsuiteId,
-                salesforceAccountId,
+                salesforceRecordId,
                 "RECONCILE",
                 SyncOperation.RECONCILE,
                 10

@@ -74,7 +74,7 @@ class CustomerJobPlannerTests {
 
     private CustomerDto netsuiteCustomer(int id, LocalDateTime modifiedAt) {
         return new CustomerDto(
-                id, null, modifiedAt, null, null, null, null, null, 0, 0, List.of()
+                id, null, modifiedAt, null, null, null, null, null, 0, List.of()
         );
     }
 

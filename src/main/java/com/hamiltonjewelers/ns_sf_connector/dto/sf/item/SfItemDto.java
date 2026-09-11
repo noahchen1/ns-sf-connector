@@ -18,9 +18,16 @@ public record SfItemDto(
             @JsonProperty("Netsuite_Id__c") Integer netsuiteId,
             @JsonProperty("Display_Name__c") String displayName,
             @JsonProperty("Vendor_Item_Number__c") String vendorNum,
+            @JsonProperty("LastModifiedDate")
             @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             LocalDateTime lastModifiedDate
     ) {}
 
     public record Attributes(String type, String url) {}
+
+    public record CreateResult(
+            String id,
+            boolean success,
+            List<Object> errors
+    ) {}
 }

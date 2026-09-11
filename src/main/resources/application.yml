@@ -39,6 +39,16 @@ app:
         - key: email
           netsuite-field: email
           salesforce-field: Account_Email__c
+      item-fields:
+        - key: name
+          netsuite-field: itemId
+          salesforce-field: Name
+        - key: displayName
+          netsuite-field: displayName
+          salesforce-field: Display_Name__c
+        - key: vendorNum
+          netsuite-field: vendorName
+          salesforce-field: Vendor_Item_Number__c
 #  autoconfigure:
 #    exclude:
 #      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
